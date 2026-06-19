@@ -13,6 +13,7 @@
 - `seogeo llms gen [--title <X>] [--summary <Y>]` —— llms.txt 脚手架（主要面向海外引擎；国内基本不读）。
 - `seogeo init [--site <X>] [--sitemap <url>]` —— 站点产物（robots + llms.txt + schema + canonical 清单）；`seogeo init --agent <claude|codex|gemini|cursor|generic>` —— 把 seogeo 接入某 agent（写指令文件 + .mcp.json，不覆盖已有）。
 - `seogeo monitor prompts --industry <X>` ｜ `monitor score --answers <f.json> --brand <X>`（零 key 手动）｜ `monitor run --industry <X> --brand <X>`（BYOK 自带 key 自动跑各引擎）—— 引用率 / SoV。
+- `seogeo offsite [--engine <豆包|元宝|文心|通义|DeepSeek|Kimi>] [--audience b2b|consumer]` —— 国内社媒/站外平台矩阵（按引擎×受众×开放/封闭 + 一题多发），差异化核心。
 
 未安装命令时用 `python -m seogeo.cli ...`（设 `PYTHONPATH=.`）。
 

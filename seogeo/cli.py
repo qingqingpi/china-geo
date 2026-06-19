@@ -10,6 +10,7 @@
   seogeo monitor prompts --industry <行业/品类>
   seogeo monitor run --industry <X> --brand <品牌> [--engines deepseek,openai] [--aliases a,b] [--competitors A,B]
   seogeo monitor score --answers <file.json> --brand <品牌> [--aliases a,b] [--competitors A,B]
+  seogeo offsite [--engine <豆包|元宝|文心|通义|DeepSeek|Kimi>] [--audience b2b|consumer]
 """
 from __future__ import annotations
 
@@ -24,6 +25,7 @@ from seogeo.generate import (
     generate_schema, write_bundle,
 )
 from seogeo.monitor import generate_prompts, score_answers, verdict
+from seogeo.offsite import cross_post_set, recommend
 from seogeo.report import render_json, render_markdown
 from seogeo.service import audit_url
 
@@ -38,7 +40,8 @@ _USAGE = (
     "  seogeo init --agent <claude|codex|gemini|cursor|generic> [--output .]\n"
     "  seogeo monitor prompts --industry <行业/品类>\n"
     "  seogeo monitor run --industry <X> --brand <品牌> [--engines deepseek,openai] [--aliases a,b] [--competitors A,B]\n"
-    "  seogeo monitor score --answers <file.json> --brand <品牌> [--aliases a,b] [--competitors A,B]"
+    "  seogeo monitor score --answers <file.json> --brand <品牌> [--aliases a,b] [--competitors A,B]\n"
+    "  seogeo offsite [--engine <豆包|元宝|文心|通义|DeepSeek|Kimi>] [--audience b2b|consumer]"
 )
 
 
@@ -199,11 +202,42 @@ def _cmd_monitor(args: list) -> int:
     return 2
 
 
+def _cmd_offsite(args: list) -> int:
+    engine = _arg(args, "--engine")
+    audience = _arg(args, "--audience")
+    plats = recommend(engine=engine, audience=audience)
+    filt = []
+    if engine:
+        filt.append(f"喂 {engine}")
+    if audience:
+        filt.append("B2B/科技" if audience == "b2b" else "消费/生活")
+    print("# 国内社媒 / 站外平台矩阵" + (f"（筛选：{'、'.join(filt)}）" if filt else "") + "\n")
+    if not plats:
+        print("没有匹配平台。引擎：豆包/元宝/文心/通义/DeepSeek/Kimi；受众：b2b/consumer。")
+        return 0
+    print("## 推荐平台（→ 喂哪些引擎 ｜ 受众 ｜ 开放/封闭 ｜ 打法）")
+    for p in plats:
+        aud = "/".join("B2B" if a == "b2b" else "消费" for a in p.audiences)
+        kind = "开放" if p.open else "封闭(平台内SEO)"
+        print(f"- {p.name} → {'/'.join(p.engines)} ｜ {aud} ｜ {kind} ｜ {p.tip}")
+    print("\n## 一题多发（同文改写、多平台同步）")
+    print(" / ".join(cross_post_set()) + " —— 一次产出、多源覆盖")
+    closed = [p for p in plats if not p.open]
+    if closed:
+        print("\n## 封闭型（外部 AI 不引，想被引就进场内做平台内 SEO）")
+        for p in closed:
+            print(f"- {p.name}：{p.tip}")
+    print("\n> 每家 AI 主要吃自己生态——按目标引擎 / 受众选平台分发，别一稿到处糊；"
+          "占比是单行业样本，方向可信、数值仅参考。")
+    return 0
+
+
 def main(argv: list | None = None) -> int:
     argv = argv if argv is not None else sys.argv[1:]
     cmd = argv[0] if argv else ""
     dispatch = {"audit": _cmd_audit, "bots": _cmd_bots, "schema": _cmd_schema,
-                "llms": _cmd_llms, "init": _cmd_init, "monitor": _cmd_monitor}
+                "llms": _cmd_llms, "init": _cmd_init, "monitor": _cmd_monitor,
+                "offsite": _cmd_offsite}
     if cmd in dispatch:
         return dispatch[cmd](argv[1:])
     print(_USAGE)

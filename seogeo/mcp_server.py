@@ -10,6 +10,7 @@ import json
 from seogeo.engines import available_engines, run_matrix
 from seogeo.generate import generate_llms, generate_robots, generate_schema
 from seogeo.monitor import generate_prompts, score_answers
+from seogeo.offsite import recommend
 from seogeo.report import render_markdown
 from seogeo.service import audit_url
 
@@ -79,6 +80,13 @@ def monitor_run(industry: str, brand: str, engines: str = "",
     alias_list = [a.strip() for a in aliases.split(",") if a.strip()]
     comp = {c.strip(): [] for c in competitors.split(",") if c.strip()}
     return score_answers(answers, brand, alias_list, comp)
+
+
+@mcp.tool()
+def offsite(engine: str = "", audience: str = "") -> list:
+    """国内社媒 / 站外平台矩阵：按目标引擎（豆包/元宝/文心/通义/DeepSeek/Kimi）或受众（b2b/consumer）推荐分发平台。"""
+    return [{"platform": p.name, "engines": list(p.engines), "audiences": list(p.audiences),
+             "open": p.open, "tip": p.tip} for p in recommend(engine or None, audience or None)]
 
 
 def main() -> None:

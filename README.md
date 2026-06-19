@@ -77,7 +77,7 @@ Claude Code 一键装成插件（含 5 个技能 + MCP），以及 Codex / Curso
 - [x] Claude 斜杠命令（`/seogeo:audit` `/seogeo:monitor`，直接跑 CLI 注入结果）
 - [x] CI（GitHub Actions 跑 Python 3.9–3.12 测试）+ 打 GitHub Release 自动发 PyPI
 - [x] 引用率 / SoV 监控（零 key 手动抽样，中文友好，真 SoV）：`seogeo monitor` + seogeo-monitor Skill
-- [x] 站外矩阵 + 实体权威层（知乎 / CSDN / 公众号 / 小红书…）→ `seogeo-offsite` skill
+- [x] 站外矩阵 + 实体权威层（知乎 / CSDN / 公众号 / 小红书…）：`seogeo offsite` 确定性矩阵（按引擎×受众×开放/封闭）+ `seogeo-offsite` skill
 - [x] BYOK 监控自动跑引擎（自带 key 一条命令跑完各引擎）：`seogeo monitor run`
 
 > ⚠️ 早期阶段（v0）。欢迎 issue / PR。
