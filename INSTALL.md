@@ -33,7 +33,12 @@ cd china-geo && pip install -e .
 
 仓库根的 **`AGENTS.md`** 是事实标准指令文件，这些 agent 会自动读到，知道何时调 `seogeo` 与各 skill。再按支持度叠加：
 
-- **支持 MCP 的**：把根目录 `.mcp.json` 里的 `seogeo` 服务加进该 agent 的 MCP 配置（Codex 走 `~/.codex/config.toml`）。
+- **支持 MCP 的**：把根目录 `.mcp.json` 里的 `seogeo` 服务加进该 agent 的 MCP 配置。Codex 走 `~/.codex/config.toml`：
+
+  ```toml
+  [mcp_servers.seogeo]
+  command = "seogeo-mcp"
+  ```
 - **支持 Agent Skills 的**（Codex / CodeBuddy / Kimi 等）：`skills/*/SKILL.md` 是 vendor-neutral 纯 Markdown，放进该 agent 的 skills 目录即可。
 - **都不支持的**（如 Cursor）：直接 `seogeo <命令>` 命令行也能拿到约 80% 价值。
 

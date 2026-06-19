@@ -2,6 +2,7 @@
 
 这些是"一键安装"的地基，手滑写坏 JSON 就装不上——用测试钉住。
 """
+import glob
 import json
 import os
 
@@ -29,3 +30,11 @@ def test_mcp_json_declares_server():
     m = _load(".mcp.json")
     assert "seogeo" in m["mcpServers"]
     assert m["mcpServers"]["seogeo"]["command"]
+
+
+def test_claude_commands_present_with_frontmatter():
+    cmds = glob.glob(os.path.join(_ROOT, "commands", "*.md"))
+    assert cmds, "应至少有一个 Claude 斜杠命令"
+    for c in cmds:
+        with open(c, encoding="utf-8") as f:
+            assert f.read().startswith("---"), f"{c} 缺 frontmatter"

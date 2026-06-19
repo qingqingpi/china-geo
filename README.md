@@ -74,6 +74,7 @@ Claude Code 一键装成插件（含 5 个技能 + MCP），以及 Codex / Curso
 - [x] MCP server（7 工具：audit / bots_gen / schema_gen / llms_gen / monitor_prompts / monitor_run / monitor_score；可选 `pip install china-geo[mcp]`，跑 `seogeo-mcp`）
 - [x] Claude 插件一键装（`.claude-plugin/` plugin.json + marketplace + 根 `.mcp.json`）→ 见 [INSTALL.md](INSTALL.md)
 - [x] 跨 agent 一键接入：`seogeo init --agent <claude|codex|gemini|cursor|generic>`（写指令文件 + `.mcp.json`，不覆盖已有）
+- [x] Claude 斜杠命令（`/seogeo:audit` `/seogeo:monitor`，直接跑 CLI 注入结果）
 - [x] 引用率 / SoV 监控（零 key 手动抽样，中文友好，真 SoV）：`seogeo monitor` + seogeo-monitor Skill
 - [x] 站外矩阵 + 实体权威层（知乎 / CSDN / 公众号 / 小红书…）→ `seogeo-offsite` skill
 - [x] BYOK 监控自动跑引擎（自带 key 一条命令跑完各引擎）：`seogeo monitor run`
