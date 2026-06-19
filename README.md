@@ -60,7 +60,7 @@ seogeo audit example.com --format json    # JSON（给 agent / CI）
 - [ ] Bytespider 服务端硬拦探测 + 反向 DNS 真伪校验
 - [ ] 行动清单：预期效果（量化）+ 影响哪些引擎 + 怎么验证
 - [x] Agent Skill（中文门面：调 CLI 出中文行动清单；vendor-neutral，跑在 Claude Code / Codex / CodeBuddy / Qoder / Kimi 等）
-- [ ] 引用率 / SoV 监控（零 key 抽样，覆盖国产六引擎）
+- [x] 引用率 / SoV 监控（零 key 手动抽样，中文友好，真 SoV）：`seogeo monitor` + seogeo-monitor Skill
 - [ ] 站外矩阵（知乎 / CSDN / 公众号 / 小红书…）
 
 > ⚠️ 早期阶段（v0）。欢迎 issue / PR。
