@@ -1,0 +1,98 @@
+"""审计结果 + 优先级建议矩阵 + 报告渲染。
+
+- build_recommendations：移植自 Auriti `audit.py`，按桶分类 + 按可恢复分排序；
+  domestic 类 fail 直接 Critical（seogeo 差异化最高优先）。
+- render_json：机器/skill 用。render_markdown：人话，含优先级矩阵（🔴必须修/🟠重要/🟢快速见效）。
+"""
+from __future__ import annotations
+
+import json
+from dataclasses import dataclass, field
+
+
+@dataclass
+class AuditResult:
+    url: str
+    score: int
+    band: str
+    breakdown: dict
+    outcomes: list
+    recommendations: list = field(default_factory=list)
+    duration_ms: int = 0
+
+
+_PRIO_ORDER = {"Critical": 0, "High": 1, "Quick Win": 2}
+
+
+def build_recommendations(outcomes) -> list:
+    recs = []
+    for o in outcomes:
+        if o.status == "pass" or not o.recommendation:
+            continue
+        gap = o.max_score - o.score  # 可恢复分
+        if o.category == "domestic" and o.status == "fail":
+            prio = "Critical"
+        elif gap >= 8:
+            prio = "Critical"
+        elif gap >= 3:
+            prio = "High"
+        else:
+            prio = "Quick Win"
+        recs.append({"priority": prio, "category": o.category, "points": gap,
+                     "text": o.recommendation, "rule_id": o.id})
+    return sorted(recs, key=lambda r: (_PRIO_ORDER[r["priority"]], -r["points"]))
+
+
+def render_json(result: AuditResult) -> str:
+    return json.dumps({
+        "url": result.url,
+        "score": result.score,
+        "band": result.band,
+        "breakdown": result.breakdown,
+        "checks": [
+            {"id": o.id, "category": o.category, "status": o.status,
+             "score": o.score, "max": o.max_score, "message": o.message,
+             "recommendation": o.recommendation, "evidence": o.evidence}
+            for o in result.outcomes
+        ],
+        "recommendations": result.recommendations,
+        "duration_ms": result.duration_ms,
+    }, ensure_ascii=False, indent=2)
+
+
+_BAND_CN = {"excellent": "优秀", "good": "良好", "foundation": "待打基础", "critical": "亟需整改"}
+_CAT_CN = {
+    "domestic": "★国内 AI 爬虫准入", "overseas": "海外 AI 爬虫准入",
+    "discovery": "AI 可发现性", "structure": "结构化",
+    "content": "内容可引用性", "rendering": "JS 渲染可见性", "technical": "技术基线",
+}
+_PRIO_ICON = {"Critical": "🔴 必须修", "High": "🟠 重要", "Quick Win": "🟢 快速见效"}
+
+
+def render_markdown(result: AuditResult) -> str:
+    lines = [
+        f"# seogeo 体检报告：{result.url}",
+        "",
+        f"**总分 {result.score}/100 · 等级：{_BAND_CN.get(result.band, result.band)}**"
+        f"（耗时 {result.duration_ms}ms）",
+        "",
+        "## 分项得分",
+        "| 维度 | 得分 |",
+        "|---|---|",
+    ]
+    for cat, b in result.breakdown.items():
+        lines.append(f"| {_CAT_CN.get(cat, cat)} | {b['earned']}/{b['max']} |")
+
+    lines += ["", "## 优先级修复清单"]
+    if not result.recommendations:
+        lines.append("")
+        lines.append("🎉 没有发现需要修复的问题。")
+    else:
+        cur = None
+        for r in result.recommendations:
+            if r["priority"] != cur:
+                cur = r["priority"]
+                lines.append(f"\n### {_PRIO_ICON.get(cur, cur)}")
+            cat_cn = _CAT_CN.get(r["category"], r["category"])
+            lines.append(f"- **[+{r['points']}分 · {cat_cn}]** {r['text']}")
+    return "\n".join(lines)

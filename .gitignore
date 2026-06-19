@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+
+# 测试/工具缓存
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# 系统
+.DS_Store
+
+# 内部设计/策略笔记（不公开）
+DESIGN.md
