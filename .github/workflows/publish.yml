@@ -1,30 +1,69 @@
-# 发布到 PyPI：在 GitHub 上 publish 一个 Release 即自动构建并上传。
+# 发布到 PyPI —— 两条路径，都走 Trusted Publishing（OIDC，无需 token / secret）：
+#   A. 一键发版（推荐）：Actions 页选本工作流 → "Run workflow" → 选 patch / minor / major。
+#      自动：bump 4 处版本号 → 构建 → 发 PyPI → 提交 + 打 tag + 建带更新日志的 Release。
+#   B. 手动：自己建一个 GitHub Release（tag vX.Y.Z）即触发构建并上传。
 #
-# 一次性设置（用 PyPI Trusted Publishing，无需 token / secret）：
-#   1. 登录 https://pypi.org → 你的项目 Chinese-Geo → 没有则先在 PyPI 建 "pending publisher"。
-#   2. Trusted Publisher 填：Owner=qingqingpi，Repo=Chinese-Geo，Workflow=publish.yml，Environment=pypi。
-#   3. 在本仓库 Settings → Environments 建一个名为 pypi 的 environment。
-# 之后每次 GitHub Release（建议 tag = v0.0.1 等）都会自动发包。
+# 一次性设置：
+#   1. PyPI → 项目 Chinese-Geo 的 "pending publisher"：Owner=qingqingpi，Repo=Chinese-Geo，
+#      Workflow=publish.yml，Environment=pypi（留空 Any 亦可）。
+#   2. 本仓库 Settings → Environments 建一个名为 pypi 的 environment。
 name: Publish to PyPI
 
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      level:
+        description: "版本号递增级别"
+        required: true
+        default: patch
+        type: choice
+        options: [patch, minor, major]
 
 jobs:
-  build-and-publish:
+  release-and-publish:
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
-      id-token: write  # Trusted Publishing 用 OIDC，无需 API token
+      id-token: write   # Trusted Publishing 用 OIDC，无需 API token
+      contents: write   # 一键路径要提交版本号 + 打 tag + 建 Release
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # 算更新日志（git log 自上个 tag）+ 推送需要全历史
+
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Build sdist + wheel
+
+      - name: Bump 版本 + 生成更新日志（一键路径）
+        if: github.event_name == 'workflow_dispatch'
+        id: bump
+        run: |
+          NEW=$(python -m seogeo.versioning bump "${{ github.event.inputs.level }}")
+          echo "version=$NEW" >> "$GITHUB_OUTPUT"
+          python -m seogeo.versioning notes "v$NEW" > RELEASE_NOTES.md
+          echo "::notice::新版本 v$NEW"
+
+      - name: 构建 sdist + wheel
         run: |
           pip install build
           python -m build
-      - name: Publish to PyPI
+
+      - name: 发布到 PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+
+      - name: 提交 + 打 tag + 建 Release（一键路径）
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          NEW="${{ steps.bump.outputs.version }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -am "chore: release v$NEW"
+          git tag "v$NEW"
+          git push origin HEAD:main
+          git push origin "v$NEW"
+          gh release create "v$NEW" --title "Chinese-Geo v$NEW" --notes-file RELEASE_NOTES.md
