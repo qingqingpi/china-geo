@@ -10,10 +10,12 @@ dependencies = []  # 运行时零依赖（核心）
 
 [project.optional-dependencies]
 render = ["playwright>=1.40"]  # 可选：JS 渲染对比
+mcp = ["mcp>=1.0"]  # 可选：MCP server（seogeo-mcp）
 dev = ["pytest>=7"]
 
 [project.scripts]
 seogeo = "seogeo.cli:main"
+seogeo-mcp = "seogeo.mcp_server:main"
 
 [build-system]
 requires = ["setuptools>=61"]
