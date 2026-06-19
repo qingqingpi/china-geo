@@ -1,14 +1,14 @@
-# 安装 china-geo（命令 `seogeo`）
+# 安装 Chinese-Geo（命令 `seogeo`）
 
 分两层：**L0 CLI（所有 agent 都要）** + **各 agent 的原生集成（可选，体验更顺）**。设计原则是"越底层越通用"——CLI 100% 覆盖，上层按 agent 支持度优雅降级。
 
 ## 第 1 步：装 CLI（必装，运行时零依赖）
 
-当前从源码安装（发行名 `china-geo`，命令名 `seogeo`；PyPI 发布后即可直接 `pip install china-geo`）：
+当前从源码安装（发行名 `Chinese-Geo`，命令名 `seogeo`；PyPI 发布后即可直接 `pip install Chinese-Geo`）：
 
 ```bash
-git clone https://github.com/qingqingpi/china-geo
-cd china-geo
+git clone https://github.com/qingqingpi/Chinese-Geo
+cd Chinese-Geo
 pip install -e .            # 得到 `seogeo` 命令（纯标准库）
 pip install -e ".[mcp]"     # 想用 MCP 再加（得到 `seogeo-mcp`）
 ```
@@ -20,11 +20,11 @@ pip install -e ".[mcp]"     # 想用 MCP 再加（得到 `seogeo-mcp`）
 ### Claude Code —— 一键插件（skills + MCP）
 
 ```
-/plugin marketplace add qingqingpi/china-geo
+/plugin marketplace add qingqingpi/Chinese-Geo
 /plugin install seogeo
 ```
 
-装上后 5 个技能自动可用：`/seogeo:seogeo-audit`、`seogeo-structure`、`seogeo-content`、`seogeo-offsite`、`seogeo-monitor`；根目录 `.mcp.json` 里的 `seogeo` MCP 服务也会注册（需先 `pip install "china-geo[mcp]"`，让 `seogeo-mcp` 在 PATH 上）。
+装上后 6 个技能自动可用：`/seogeo:seogeo-optimize`、`seogeo-audit`、`seogeo-structure`、`seogeo-content`、`seogeo-offsite`、`seogeo-monitor`；根目录 `.mcp.json` 里的 `seogeo` MCP 服务也会注册（需先 `pip install "Chinese-Geo[mcp]"`，让 `seogeo-mcp` 在 PATH 上）。
 
 ### Codex / opencode / CodeBuddy / Qoder / Kimi / Cursor / Trae 等
 
@@ -47,6 +47,6 @@ pip install -e ".[mcp]"     # 想用 MCP 再加（得到 `seogeo-mcp`）
 |---|---|---|
 | L0 确定性引擎 | `seogeo` CLI（pip 装，零依赖） | 100%，所有 agent shell 可调 |
 | L1 指令 | `AGENTS.md`（`CLAUDE.md` 软链到它） | 30+ agent 事实标准 |
-| L2 工具 | `.mcp.json` → `seogeo-mcp`（7 工具） | 几乎全 agent |
-| L3 判断逻辑 | `skills/*/SKILL.md`（5 个，vendor-neutral） | 准通用 |
+| L2 工具 | `.mcp.json` → `seogeo-mcp`（8 工具） | 几乎全 agent |
+| L3 判断逻辑 | `skills/*/SKILL.md`（6 个，vendor-neutral） | 准通用 |
 | L4 各家专属糖 | `.claude-plugin/`（Claude 插件 + marketplace） | 各家不通用，逐 agent 薄加 |

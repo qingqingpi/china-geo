@@ -121,7 +121,7 @@ def _init_agent(agent: str, out_dir: str) -> int:
     for p in skipped:
         print(f"⏭ 已存在，跳过（如需可手动并入 seogeo 段）：{p}")
     print(f"\n{agent} 接入完成。支持 MCP 的话 .mcp.json 里的 seogeo 服务即可用"
-          "（需 pip install \"china-geo[mcp]\"）。")
+          "（需 pip install \"Chinese-Geo[mcp]\"）。")
     return 0
 
 

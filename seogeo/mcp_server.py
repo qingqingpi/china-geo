@@ -1,7 +1,7 @@
 """seogeo MCP server（L2 工具层，可选）。
 
 把 CLI 能力暴露为 MCP 工具，让支持 MCP 的 agent（Claude / Codex / Cursor / opencode /
-CodeBuddy / Qoder / Kimi 等）以结构化方式调用。需要 `pip install china-geo[mcp]`，运行 `seogeo-mcp`。
+CodeBuddy / Qoder / Kimi 等）以结构化方式调用。需要 `pip install Chinese-Geo[mcp]`，运行 `seogeo-mcp`。
 """
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ from seogeo.service import audit_url
 try:
     from mcp.server.fastmcp import FastMCP
 except ImportError as e:  # pragma: no cover
-    raise SystemExit("需要 MCP 依赖：pip install china-geo[mcp]") from e
+    raise SystemExit("需要 MCP 依赖：pip install Chinese-Geo[mcp]") from e
 
 mcp = FastMCP("seogeo")
 

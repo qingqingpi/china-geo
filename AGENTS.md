@@ -1,4 +1,4 @@
-# AGENTS.md — china-geo
+# AGENTS.md — Chinese-Geo
 
 中文 / 国内生态优先的开源 SEO + GEO 工具（命令名 `seogeo`）。本文件给任何 AI 编程 Agent（Claude Code / Codex / opencode / CodeBuddy / Qoder / Kimi / Trae 等）读：知道这个项目是什么、怎么用、怎么开发。
 
