@@ -63,7 +63,7 @@
 - [x] A1. **扩 `init --agent`：CodeBuddy / Kimi / opencode**。✅ codebuddy→`CODEBUDDY.md`+`.mcp.json`、opencode→`AGENTS.md`+`opencode.json`(键 `mcp`/`type`)、kimi→`AGENTS.md`+`MCP-SETUP-kimi.md`。
 - [x] A1b. **扩 `init --agent`：Qoder / Trae / Lingma**。✅ qoder→`AGENTS.md`+`MCP-SETUP-qoder.md`(UI-only)、trae→`.trae/rules/project_rules.md`+`.trae/mcp.json`、lingma→`.lingma/rules/seogeo.md`+`MCP-SETUP-lingma.md`；新增 `guidance` 策略 + `mcp_path` 覆写。
 - [x] A2. **每个 agent 一份"用法卡"** `docs/agents/<name>.md`。✅ 8 张卡（claude/codex/codebuddy/kimi/opencode/qoder/trae/lingma）+ 共享 `cli-output-samples.md`（真跑落盘）；`test_agent_docs.py` 落点同步防漂移；命令统一 chinese-geo。
-- [ ] A3. **每个 agent 一份人工验证清单** `docs/verify/VERIFY-<name>.md`：在真 agent 里实跑、勾选、贴 transcript/截图的模板（loop 备好，⏳ 人来执行）。
+- [x] A3. **每个 agent 一份人工验证清单** `docs/verify/VERIFY-<name>.md`：在真 agent 里实跑、勾选、贴 transcript/截图的模板（loop 备好，⏳ 人来执行）。 ✅ 完成：8 份 `VERIFY-<name>.md`（claude/codex/codebuddy/kimi/opencode/qoder/trae/lingma）——环境 / 落点(与 build_agent_bundle 一致) / CLI 直调 / 原生调法 勾选清单 + ⏳ 待人工填实跑结果；`test_verify_docs.py` 32 项防漂移；288 测试。
 - [ ] A4. **跨 agent 接入冒烟测试**：临时目录里验证 `init --agent <X>` 产出正确指令文件 + 正确 MCP 键名/路径、不覆盖已有（零网络）。
 
 ### Track B —— 可证明的结果（真实站点案例 harness）

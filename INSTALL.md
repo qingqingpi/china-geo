@@ -43,6 +43,8 @@ pip install -e ".[mcp]"     # 想用 MCP 再加（得到 `chinese-geo-mcp`）
 
 > **每个 agent 的详细用法卡**（装法 + 调法 + 真实 CLI 输出样例 + 预期看到什么）见 [`docs/agents/`](docs/agents/)：
 > [claude](docs/agents/claude.md) / [codex](docs/agents/codex.md) / [codebuddy](docs/agents/codebuddy.md) / [kimi](docs/agents/kimi.md) / [opencode](docs/agents/opencode.md) / [qoder](docs/agents/qoder.md) / [trae](docs/agents/trae.md) / [lingma](docs/agents/lingma.md)。
+>
+> 想在真 agent 里实跑验收？每家配了**人工验证清单** [`docs/verify/`](docs/verify/)（`VERIFY-<agent>.md`：勾选 + 贴 transcript/截图的模板）。
 
 ## 分层一览
 
