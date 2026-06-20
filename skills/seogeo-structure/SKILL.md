@@ -1,9 +1,9 @@
 ---
 name: seogeo-structure
-description: 当用户想优化页面"结构/骨架"让 AI 更易抽取引用时使用——"内容 AI 抓了但不引用"、"怎么排版 AI 才爱用"、"答案胶囊/FAQ/表格怎么做"、"标题层级/分块"、"schema 和正文对不上"。先跑 seogeo audit/schema 看结构项，再给重排建议。不用于：纯文案改写（用 seogeo-content）、站外分发（用 seogeo-offsite）。
+description: 当用户想优化页面"结构/骨架"让 AI 更易抽取引用时使用——"内容 AI 抓了但不引用"、"怎么排版 AI 才爱用"、"答案胶囊/FAQ/表格怎么做"、"标题层级/分块"、"schema 和正文对不上"。先跑 chinese-geo audit/schema 看结构项，再给重排建议。不用于：纯文案改写（用 seogeo-content）、站外分发（用 seogeo-offsite）。
 ---
 
-# seogeo · 结构优化（让 AI 抽得动、愿意引）
+# chinese-geo · 结构优化（让 AI 抽得动、愿意引）
 
 AI 引用的是"块"，不是整页。把页面拆成自包含、可直接抽取的单元，被引概率上升——结构化形态（表格、列表）更易被整段抽取（业界普遍观察；具体倍数随研究口径差异很大，无统一权威数字）。
 
@@ -11,12 +11,12 @@ AI 引用的是"块"，不是整页。把页面拆成自包含、可直接抽取
 
 1. 先体检结构项（确定性、零 key）：
    ```bash
-   seogeo audit <域名> --format json
+   chinese-geo audit <域名> --format json
    ```
    未安装命令时用 `python -m seogeo.cli audit <域名> --format json`。重点看 `structure`(JSON-LD) 与 `content`(可引用性) 两项的 `checks` / `recommendation`。
 2. 需要结构化脚手架时：
    ```bash
-   seogeo schema gen <organization|article|faqpage|breadcrumb>
+   chinese-geo schema gen <organization|article|faqpage|breadcrumb>
    ```
 3. 按下面清单逐项重排，再重跑 audit 看对应项转绿。
 

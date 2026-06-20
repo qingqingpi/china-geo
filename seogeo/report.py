@@ -83,7 +83,7 @@ _PRIO_ICON = {"Critical": "🔴 必须修", "High": "🟠 重要", "Quick Win": 
 
 def render_markdown(result: AuditResult) -> str:
     lines = [
-        f"# seogeo 体检报告：{result.url}",
+        f"# chinese-geo 体检报告：{result.url}",
         "",
         f"**总分 {result.score}/100 · 等级：{_BAND_CN.get(result.band, result.band)}**"
         f"（耗时 {result.duration_ms}ms）",
@@ -111,7 +111,7 @@ def render_markdown(result: AuditResult) -> str:
                 lines.append(f"  - 影响引擎：{r['engines']}")
         lines += [
             "",
-            "> 验证闭环：改完重跑 `seogeo audit` 看对应项转绿；上线几周后用 "
-            "`seogeo monitor` 抽样看引用率 / SoV 是否回升（GEO 要持续监控，不是一次性）。",
+            "> 验证闭环：改完重跑 `chinese-geo audit` 看对应项转绿；上线几周后用 "
+            "`chinese-geo monitor` 抽样看引用率 / SoV 是否回升（GEO 要持续监控，不是一次性）。",
         ]
     return "\n".join(lines)

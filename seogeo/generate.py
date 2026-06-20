@@ -16,7 +16,7 @@ from seogeo.data.overseas_bots import OVERSEAS_BOTS
 def generate_robots(allow_domestic: bool = True, allow_overseas: bool = True,
                     sitemap_url: str | None = None) -> str:
     lines = [
-        "# 由 seogeo 生成：放行主流 AI 爬虫",
+        "# 由 chinese-geo 生成：放行主流 AI 爬虫",
         "# 注意：Bytespider 不完全遵守 robots；如需限流请在服务端 / WAF 按 UA 硬拦",
         "",
     ]
@@ -107,7 +107,7 @@ def generate_llms(title: str, summary: str | None = None,
 
 
 _CANONICAL_CHECKLIST = """\
-# canonical / meta 逐页自查清单（seogeo 生成）
+# canonical / meta 逐页自查清单（chinese-geo 生成）
 
 每页都过一遍——这些是 AI 爬虫"看懂并更易引用"的技术底线。
 
@@ -143,7 +143,7 @@ def build_init_bundle(site_title: str = "<站点名>", sitemap_url: str | None =
 
 
 _AGENT_MCP_JSON = json.dumps(
-    {"mcpServers": {"seogeo": {"command": "seogeo-mcp", "args": []}}},
+    {"mcpServers": {"chinese-geo": {"command": "chinese-geo-mcp", "args": []}}},
     ensure_ascii=False, indent=2,
 ) + "\n"
 
@@ -157,16 +157,16 @@ _AGENT_INSTRUCTION_FILE = {
 }
 
 _AGENT_BLURB = """\
-# seogeo —— AI 可见性 / GEO 优化工具（本项目已接入）
+# chinese-geo —— AI 可见性 / GEO 优化工具（本项目已接入）
 
 让网站被国内（豆包 / DeepSeek / 文心 / 通义 / 元宝 / Kimi）与海外（ChatGPT / Claude /
 Perplexity / Google AI）AI 引擎抓取与引用。做 AI 可见性 / GEO / SEO 时用下面的命令与技能。
 
 ## CLI（确定性、零依赖；未装命令时用 `python -m seogeo.cli ...`）
-- `seogeo audit <url> [--format md|json]` —— 7 维度 AI 可见性体检。
-- `seogeo bots gen` / `bots verify <ip> <bot>` —— robots（国内各家单独成块）/ 反向 DNS 校验。
-- `seogeo schema gen <type>` ｜ `llms gen` ｜ `init` —— JSON-LD / llms.txt / 一键打包产物。
-- `seogeo monitor prompts｜run｜score` —— 引用率 / SoV（零 key 手动 + BYOK 自动）。
+- `chinese-geo audit <url> [--format md|json]` —— 7 维度 AI 可见性体检。
+- `chinese-geo bots gen` / `bots verify <ip> <bot>` —— robots（国内各家单独成块）/ 反向 DNS 校验。
+- `chinese-geo schema gen <type>` ｜ `llms gen` ｜ `init` —— JSON-LD / llms.txt / 一键打包产物。
+- `chinese-geo monitor prompts｜run｜score` —— 引用率 / SoV（零 key 手动 + BYOK 自动）。
 
 ## 关键 know-how
 - 国内爬虫各家单独成块（对 Bytespider/搜狗 是保险做法）；Bytespider 不完全守 robots，要服务端硬拦。

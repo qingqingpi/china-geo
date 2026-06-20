@@ -152,7 +152,7 @@ def test_write_bundle_creates_nested_dirs(tmp_path):
 def test_agent_bundle_claude_has_instruction_and_mcp():
     b = build_agent_bundle("claude")
     assert "CLAUDE.md" in b and ".mcp.json" in b
-    assert "seogeo audit" in b["CLAUDE.md"]
+    assert "chinese-geo audit" in b["CLAUDE.md"]
 
 
 def test_agent_bundle_cursor_uses_nested_rules_path():
@@ -162,7 +162,7 @@ def test_agent_bundle_cursor_uses_nested_rules_path():
 def test_agent_bundle_mcp_is_valid_json_with_server():
     import json
     mcp = json.loads(build_agent_bundle("gemini")[".mcp.json"])
-    assert "seogeo" in mcp["mcpServers"]
+    assert "chinese-geo" in mcp["mcpServers"]
 
 
 def test_agent_bundle_instruction_is_neutral_terminology():

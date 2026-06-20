@@ -1,7 +1,7 @@
 {
   "mcpServers": {
-    "seogeo": {
-      "command": "seogeo-mcp",
+    "chinese-geo": {
+      "command": "chinese-geo-mcp",
       "args": []
     }
   }

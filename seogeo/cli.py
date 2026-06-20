@@ -1,16 +1,16 @@
-"""seogeo CLI 入口。
+"""chinese-geo CLI 入口。
 
-  seogeo audit <url> [--format md|json]
-  seogeo bots gen [--sitemap <url>] [--no-domestic] [--no-overseas]
-  seogeo bots verify <ip> <bot>
-  seogeo schema gen <organization|article|faqpage|breadcrumb>
-  seogeo llms gen [--title <站点名>] [--summary <一句话简介>]
-  seogeo init [--site <站点名>] [--sitemap <url>] [--output <目录>]      # 生成站点产物
-  seogeo init --agent <claude|codex|gemini|cursor|generic> [--output .] # 接入某 agent
-  seogeo monitor prompts --industry <行业/品类>
-  seogeo monitor run --industry <X> --brand <品牌> [--engines deepseek,openai] [--aliases a,b] [--competitors A,B]
-  seogeo monitor score --answers <file.json> --brand <品牌> [--aliases a,b] [--competitors A,B]
-  seogeo offsite [--engine <豆包|元宝|文心|通义|DeepSeek|Kimi>] [--audience b2b|consumer]
+  chinese-geo audit <url> [--format md|json]
+  chinese-geo bots gen [--sitemap <url>] [--no-domestic] [--no-overseas]
+  chinese-geo bots verify <ip> <bot>
+  chinese-geo schema gen <organization|article|faqpage|breadcrumb>
+  chinese-geo llms gen [--title <站点名>] [--summary <一句话简介>]
+  chinese-geo init [--site <站点名>] [--sitemap <url>] [--output <目录>]      # 生成站点产物
+  chinese-geo init --agent <claude|codex|gemini|cursor|generic> [--output .] # 接入某 agent
+  chinese-geo monitor prompts --industry <行业/品类>
+  chinese-geo monitor run --industry <X> --brand <品牌> [--engines deepseek,openai] [--aliases a,b] [--competitors A,B]
+  chinese-geo monitor score --answers <file.json> --brand <品牌> [--aliases a,b] [--competitors A,B]
+  chinese-geo offsite [--engine <豆包|元宝|文心|通义|DeepSeek|Kimi>] [--audience b2b|consumer]
 """
 from __future__ import annotations
 
@@ -31,17 +31,17 @@ from seogeo.service import audit_url
 
 _USAGE = (
     "用法：\n"
-    "  seogeo audit <域名或URL> [--format md|json]\n"
-    "  seogeo bots gen [--sitemap <url>] [--no-domestic] [--no-overseas]\n"
-    "  seogeo bots verify <ip> <Baiduspider|Bytespider|PetalBot|Sogou web spider|YisouSpider>\n"
-    "  seogeo schema gen <organization|article|faqpage|breadcrumb>\n"
-    "  seogeo llms gen [--title <站点名>] [--summary <一句话简介>]\n"
-    "  seogeo init [--site <站点名>] [--sitemap <url>] [--output <目录>]\n"
-    "  seogeo init --agent <claude|codex|gemini|cursor|generic> [--output .]\n"
-    "  seogeo monitor prompts --industry <行业/品类>\n"
-    "  seogeo monitor run --industry <X> --brand <品牌> [--engines deepseek,openai] [--aliases a,b] [--competitors A,B]\n"
-    "  seogeo monitor score --answers <file.json> --brand <品牌> [--aliases a,b] [--competitors A,B]\n"
-    "  seogeo offsite [--engine <豆包|元宝|文心|通义|DeepSeek|Kimi>] [--audience b2b|consumer]"
+    "  chinese-geo audit <域名或URL> [--format md|json]\n"
+    "  chinese-geo bots gen [--sitemap <url>] [--no-domestic] [--no-overseas]\n"
+    "  chinese-geo bots verify <ip> <Baiduspider|Bytespider|PetalBot|Sogou web spider|YisouSpider>\n"
+    "  chinese-geo schema gen <organization|article|faqpage|breadcrumb>\n"
+    "  chinese-geo llms gen [--title <站点名>] [--summary <一句话简介>]\n"
+    "  chinese-geo init [--site <站点名>] [--sitemap <url>] [--output <目录>]\n"
+    "  chinese-geo init --agent <claude|codex|gemini|cursor|generic> [--output .]\n"
+    "  chinese-geo monitor prompts --industry <行业/品类>\n"
+    "  chinese-geo monitor run --industry <X> --brand <品牌> [--engines deepseek,openai] [--aliases a,b] [--competitors A,B]\n"
+    "  chinese-geo monitor score --answers <file.json> --brand <品牌> [--aliases a,b] [--competitors A,B]\n"
+    "  chinese-geo offsite [--engine <豆包|元宝|文心|通义|DeepSeek|Kimi>] [--audience b2b|consumer]"
 )
 
 
@@ -88,7 +88,7 @@ def _cmd_schema(args: list) -> int:
             print(str(e))
             return 2
         return 0
-    print("用法：seogeo schema gen <organization|article|faqpage|breadcrumb>")
+    print("用法：chinese-geo schema gen <organization|article|faqpage|breadcrumb>")
     return 2
 
 
@@ -96,7 +96,7 @@ def _cmd_llms(args: list) -> int:
     if args and args[0] == "gen":
         print(generate_llms(_arg(args, "--title", "<站点名>"), _arg(args, "--summary")))
         return 0
-    print("用法：seogeo llms gen [--title <站点名>] [--summary <一句话简介>]")
+    print("用法：chinese-geo llms gen [--title <站点名>] [--summary <一句话简介>]")
     return 2
 
 
@@ -119,8 +119,8 @@ def _init_agent(agent: str, out_dir: str) -> int:
     for p in wrote:
         print(f"✅ 写入：{p}")
     for p in skipped:
-        print(f"⏭ 已存在，跳过（如需可手动并入 seogeo 段）：{p}")
-    print(f"\n{agent} 接入完成。支持 MCP 的话 .mcp.json 里的 seogeo 服务即可用"
+        print(f"⏭ 已存在，跳过（如需可手动并入 chinese-geo 段）：{p}")
+    print(f"\n{agent} 接入完成。支持 MCP 的话 .mcp.json 里的 chinese-geo 服务即可用"
           "（需 pip install \"Chinese-Geo[mcp]\"）。")
     return 0
 
