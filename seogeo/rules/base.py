@@ -16,6 +16,7 @@ class AuditContext:
     Tier4 渲染可选（rendered_html）。"""
     url: str
     html: str = ""
+    html_error: str | None = None  # 抓首页 HTML 失败的原因（网络/DNS/SSRF guard/状态码等）；区别于"页面真空白"
     headers: dict = field(default_factory=dict)
     status: int = 200
     robots_txt: str | None = None
@@ -45,6 +46,15 @@ def outcome(rule_id: str, weight: int, status: str, message: str,
     """按 status 折算得分（pass=满分 / warn=半分 / fail=0）构造 CheckOutcome。"""
     score = {"pass": weight, "warn": weight // 2, "fail": 0}[status]
     return CheckOutcome(rule_id, status, message, recommendation, score, weight, evidence or {})
+
+
+def html_unavailable(rule_id: str, weight: int, aspect: str = "") -> CheckOutcome:
+    """首页 HTML 抓取失败时，依赖 HTML/DOM 的规则用它返回 warn——
+    避免把"抓不到首页"（网络/DNS/SSRF guard/状态码）误判成"页面质量差"（缺 H1 / 缺 schema / 0 字）。"""
+    return outcome(rule_id, weight, "warn",
+                   f"无法获取首页 HTML，无法判定{aspect}",
+                   recommendation="先确认站点可访问（网络 / DNS / 状态码 / 是否屏蔽抓取）再重试 audit",
+                   evidence={"html_unavailable": True})
 
 
 @dataclass

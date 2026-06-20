@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import json
 
-from seogeo.rules.base import AuditContext, CheckOutcome, outcome, register
+from seogeo.rules.base import AuditContext, CheckOutcome, html_unavailable, outcome, register
 
 RULE_ID = "structure-jsonld"
 WEIGHT = 16
@@ -11,6 +11,8 @@ WEIGHT = 16
 
 @register(id=RULE_ID, category="structure", weight=WEIGHT)
 def check_jsonld(ctx: AuditContext) -> CheckOutcome:
+    if ctx.html_error:
+        return html_unavailable(RULE_ID, WEIGHT, "结构化数据")
     blocks = ctx.dom.jsonld_blocks if ctx.dom else []
     types: list = []
     parse_errors = 0

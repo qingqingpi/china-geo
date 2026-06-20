@@ -5,7 +5,7 @@ Playwright 真渲染对比是可选层（后续）。
 """
 from __future__ import annotations
 
-from seogeo.rules.base import AuditContext, CheckOutcome, outcome, register
+from seogeo.rules.base import AuditContext, CheckOutcome, html_unavailable, outcome, register
 
 RULE_ID = "rendering-js-visibility"
 WEIGHT = 14
@@ -16,6 +16,8 @@ _SSR_MARKERS = ["__next_data__", "data-reactroot"]
 
 @register(id=RULE_ID, category="rendering", weight=WEIGHT)
 def check_js_visibility(ctx: AuditContext) -> CheckOutcome:
+    if ctx.html_error:
+        return html_unavailable(RULE_ID, WEIGHT, "渲染可见性")
     d = ctx.dom
     html_low = (ctx.html or "")[:20000].lower()
     text_len = d.text_length if d else 0

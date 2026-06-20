@@ -35,7 +35,7 @@ def fetch_text(url: str):
 
 def audit_url(url: str) -> AuditResult:
     origin = origin_of(url)
-    html, _ = fetch_text(origin)
+    html, html_error = fetch_text(origin)  # 保留首页抓取错误，别让"抓不到"被当成"空页面"假打分
     robots_txt, robots_error = fetch_text(origin + "/robots.txt")
     llms_txt, _ = fetch_text(origin + "/llms.txt")
     sitemap_xml, _ = fetch_text(origin + "/sitemap.xml")
@@ -44,7 +44,7 @@ def audit_url(url: str) -> AuditResult:
     if robots_txt and classify_bot("Bytespider", robots_txt).status == "blocked":
         bytespider_blocked = probe_bytespider_blocked(origin)
 
-    ctx = AuditContext(url=origin, html=html or "",
+    ctx = AuditContext(url=origin, html=html or "", html_error=html_error,
                        robots_txt=robots_txt, robots_error=robots_error,
                        llms_txt=llms_txt, sitemap_xml=sitemap_xml,
                        bytespider_blocked=bytespider_blocked)

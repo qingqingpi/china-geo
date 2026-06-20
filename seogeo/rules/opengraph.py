@@ -1,7 +1,7 @@
 """structure 类：Open Graph（分享卡片 / 部分 AI 预览靠它拿标题与摘要）。"""
 from __future__ import annotations
 
-from seogeo.rules.base import AuditContext, CheckOutcome, outcome, register
+from seogeo.rules.base import AuditContext, CheckOutcome, html_unavailable, outcome, register
 
 RULE_ID = "structure-opengraph"
 WEIGHT = 6
@@ -10,6 +10,8 @@ _CORE = ("og:title", "og:description", "og:image")
 
 @register(id=RULE_ID, category="structure", weight=WEIGHT)
 def check_og(ctx: AuditContext) -> CheckOutcome:
+    if ctx.html_error:
+        return html_unavailable(RULE_ID, WEIGHT, "Open Graph")
     metas = ctx.dom.metas if ctx.dom else {}
     present = [k for k in _CORE if metas.get(k)]
     if {"og:title", "og:description"} <= set(present):
