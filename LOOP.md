@@ -88,7 +88,7 @@
 ---
 
 ## 需要人来做（不在 loop 范围，loop 只备好模板/清单）
-- **发版策略（2026-06-20 用户定）**：① `0.3.0`（改名）随时单发、修好 `/plugin install`（急、独立）；② **必修（A/B/C）做完后**，把累积的本地提交一次性合进 main → bump 一个新版（以功能为主 → 约 `0.4.0`）→ 发**一个**版，**不按项零碎发**。push / 发版都是人按 button（gh 创建 / 网页 Draft → publish.yml 发 PyPI）；loop 跑到底我只把东西备齐 + 留绿 + 发"可发版"信号。**Track 边界复审时不催发版**，只在必修（A/B/C）全清后提醒（D 选做、不挡发版）。
+- **发版策略（2026-06-20 更新：loop 最后不发版，等人审查）**：① `0.3.0`（改名）随时单发、修好 `/plugin install`（急、独立，你的 button）；② **loop 不触发任何发版**——必修（A/B/C）做完就**停下、把本地提交 + 测试状态交给你审查**，**不催发版、不发"可发版"信号、不 push、不 bump**。发不发版、发哪个版，你审查完全权决定（与本 loop 解耦）。
 - 在真实 **Codex / CodeBuddy / Qoder / Kimi / opencode** 里实跑一遍，按 `docs/verify/VERIFY-<name>.md` 勾选、贴 transcript/截图。
 - 真实站点案例：把生成的修复**应用到你自己的站** → 等收录 → 用**真 API key** 跑 `monitor` 拿引用率/SoV 前后对比 → 填进 `docs/case-study/`。
 - 把本地 loop 提交 push / 开 PR 合进 main（reconcile 已完成、命名已是 chinese-geo）。
