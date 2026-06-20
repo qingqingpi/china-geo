@@ -91,3 +91,25 @@ def test_comments_and_blank_lines_ignored():
         "Disallow: /\n"
     )
     assert classify_bot("Bytespider", robots).status == "blocked"
+
+
+# ---- 路径通配 * 与结尾锚 $（RFC 9309 特殊字符）----
+
+def test_wildcard_disallow_star_blocks_root():
+    # Disallow: /* 用 * 通配——应挡住根路径（旧的纯前缀匹配挡不住）
+    assert classify_bot("Baiduspider", "User-agent: *\nDisallow: /*\n").status == "blocked"
+
+
+def test_dollar_anchored_disallow_blocks_exact_root():
+    # Disallow: /$ 用 $ 精确锚定根路径
+    assert classify_bot("Baiduspider", "User-agent: *\nDisallow: /$\n").status == "blocked"
+
+
+def test_wildcard_on_subpath_does_not_block_root():
+    # Disallow: /private/* 只挡子路径，不应误伤根
+    assert classify_bot("Baiduspider", "User-agent: *\nDisallow: /private/*\n").status == "allowed"
+
+
+def test_dollar_anchored_suffix_does_not_block_root():
+    # Disallow: /*.pdf$ 只挡 .pdf 结尾，根路径仍可抓
+    assert classify_bot("Baiduspider", "User-agent: *\nDisallow: /*.pdf$\n").status == "allowed"

@@ -6,10 +6,12 @@
   （via_wildcard）——Bytespider / 搜狗 对仅靠 * 覆盖的合规度有争议（站长报告、非官方），
   上层规则据此决定是否提醒；其余爬虫按 RFC 9309 遵守 *。
 
-v0 路径匹配用最常见的前缀语义（暂不支持 `*`/`$` 通配），足够回答"根路径能否被抓"。
+路径匹配：前缀语义 + RFC 9309 的 `*` 通配与结尾 `$` 锚（见 `_pattern_to_regex`），
+足够回答"根路径能否被抓"。
 """
 from __future__ import annotations
 
+import re
 from dataclasses import dataclass, field
 
 
@@ -72,8 +74,17 @@ def _select_group(ua: str, groups: list):
     return None, False
 
 
+def _pattern_to_regex(pattern: str):
+    """robots 路径模式 → 正则。RFC 9309：`*` 匹配任意序列、结尾 `$` 锚定路径末尾；
+    其余按前缀语义（不锚结尾，所以 `/admin` 命中 `/admin/x`）。"""
+    anchored = pattern.endswith("$")
+    core = pattern[:-1] if anchored else pattern
+    body = "".join(".*" if ch == "*" else re.escape(ch) for ch in core)
+    return re.compile("^" + body + ("$" if anchored else ""))
+
+
 def _matches(pattern: str, path: str) -> bool:
-    return path.startswith(pattern)
+    return _pattern_to_regex(pattern).match(path) is not None
 
 
 def _is_root_allowed(group: _Group) -> bool:

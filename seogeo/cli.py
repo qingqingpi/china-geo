@@ -54,7 +54,7 @@ def _csv(args: list, flag: str) -> list:
 
 
 def _cmd_audit(args: list) -> int:
-    if not args:
+    if not args or args[0].startswith("-"):  # 缺 URL，或把 --flag 误当 URL
         print(_USAGE)
         return 2
     fmt = _arg(args, "--format", "md")

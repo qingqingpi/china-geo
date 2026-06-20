@@ -58,7 +58,10 @@ def monitor_score(answers_json: str, brand: str, aliases: str = "", competitors:
 
     answers_json: `{"引擎":["回答",...]}` 的 JSON 字符串；aliases / competitors: 逗号分隔。
     """
-    answers = json.loads(answers_json)
+    try:
+        answers = json.loads(answers_json)
+    except (json.JSONDecodeError, TypeError) as e:
+        return {"error": f"answers_json 不是合法 JSON：{e}"}
     alias_list = [a.strip() for a in aliases.split(",") if a.strip()]
     comp = {c.strip(): [] for c in competitors.split(",") if c.strip()}
     return score_answers(answers, brand, alias_list, comp)
