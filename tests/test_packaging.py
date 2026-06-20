@@ -16,20 +16,20 @@ def _load(rel):
 
 def test_plugin_manifest_valid():
     m = _load(".claude-plugin/plugin.json")
-    assert m["name"] == "seogeo"
+    assert m["name"] == "chinese-geo"
     assert m["description"]
 
 
 def test_marketplace_lists_seogeo():
     m = _load(".claude-plugin/marketplace.json")
-    assert "seogeo" in [p["name"] for p in m["plugins"]]
+    assert "chinese-geo" in [p["name"] for p in m["plugins"]]
     assert m["plugins"][0]["source"]  # 有来源
 
 
 def test_mcp_json_declares_server():
     m = _load(".mcp.json")
-    assert "seogeo" in m["mcpServers"]
-    assert m["mcpServers"]["seogeo"]["command"]
+    assert "chinese-geo" in m["mcpServers"]
+    assert m["mcpServers"]["chinese-geo"]["command"]
 
 
 def test_claude_commands_present_with_frontmatter():

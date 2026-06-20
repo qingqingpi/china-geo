@@ -1,9 +1,9 @@
 ---
 name: seogeo-audit
-description: 当用户想检查或优化自己网站在 AI 引擎里的可见性时使用——"我的站在豆包/DeepSeek 上能不能被引用"、"AI 搜索优化"、"GEO/SEO 体检"、"AI 引不引用我"、"被 AI 抓取吗"、"怎么让 ChatGPT/文心提到我"。会运行 seogeo CLI 做确定性体检，再给出中文优先级行动清单。不用于：通用写作、与本站无关的泛泛 SEO 咨询。
+description: 当用户想检查或优化自己网站在 AI 引擎里的可见性时使用——"我的站在豆包/DeepSeek 上能不能被引用"、"AI 搜索优化"、"GEO/SEO 体检"、"AI 引不引用我"、"被 AI 抓取吗"、"怎么让 ChatGPT/文心提到我"。会运行 chinese-geo CLI 做确定性体检，再给出中文优先级行动清单。不用于：通用写作、与本站无关的泛泛 SEO 咨询。
 ---
 
-# seogeo · AI 可见性体检与优化
+# chinese-geo · AI 可见性体检与优化
 
 把"确定性体检（CLI）"和"判断型策略（你来做）"结合：CLI 给可验证的发现与打分，你把它翻译成用户能照着做的**中文行动清单**。
 
@@ -13,7 +13,7 @@ description: 当用户想检查或优化自己网站在 AI 引擎里的可见性
 
 1. 运行体检（确定性、零 key、零依赖）：
    ```bash
-   seogeo audit <域名> --format json
+   chinese-geo audit <域名> --format json
    ```
    未安装命令时用：`python -m seogeo.cli audit <域名> --format json`
 2. 读取返回的 JSON：`score` / `band` / `breakdown` / `checks[]` / `recommendations[]`。
@@ -27,7 +27,7 @@ description: 当用户想检查或优化自己网站在 AI 引擎里的可见性
 - **怎么改**：来自 `recommendation`（含可复制的 robots / schema / 文案片段）。
 - **预期效果**：查下方《手法 → 提升》表，给量化区间（如"加统计数字 → 约 +33% 可见度"）。
 - **影响哪些引擎**：直接用 JSON 的 `recommendations[].engines`（CLI 已按类给出）；要细化站外分发再查下方《引擎 → 生态》表。
-- **怎么验证**：重跑 `seogeo audit` 看该项转绿；隔几周看引用率是否回升（强调持续监控，不是一次性）。
+- **怎么验证**：重跑 `chinese-geo audit` 看该项转绿；隔几周看引用率是否回升（强调持续监控，不是一次性）。
 
 按引擎差异化给站外建议：B2B / 科技 → 公众号 + 知乎 + CSDN（喂 DeepSeek / 文心 / 元宝）；消费 / 生活 → 小红书 + 抖音 + B站（喂 豆包 / 通义）。
 

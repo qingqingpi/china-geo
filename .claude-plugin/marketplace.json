@@ -6,9 +6,9 @@
   },
   "plugins": [
     {
-      "name": "seogeo",
+      "name": "chinese-geo",
       "description": "国内生态优先的 SEO + GEO 工具：体检爬虫准入/结构/可引用性，生成 robots+schema+llms，零 key 引用率·SoV 监控。6 个 skill + 8 个 MCP 工具。",
-      "version": "0.2.1",
+      "version": "0.3.0",
       "source": {
         "source": "github",
         "repo": "qingqingpi/Chinese-Geo"

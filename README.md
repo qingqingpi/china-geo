@@ -6,7 +6,7 @@
 
 现有 SEO/GEO 工具几乎全是英文 / 海外生态视角（只盯 ChatGPT / Perplexity，只认 Wikipedia / llms.txt）。**Chinese-Geo 把国内这一套补全，同时不丢海外主流**：国内爬虫准入、百度系结构化、知乎 / CSDN / 公众号站外矩阵、国产引擎引用监控——这是海外工具的空白。
 
-> 命令行工具名为 `seogeo`（仓库名 `Chinese-Geo`）。
+> 命令行工具名为 `chinese-geo`（仓库名 `Chinese-Geo`）。
 
 ## ✨ 现在能做什么（v0）
 
@@ -31,14 +31,14 @@ git clone https://github.com/qingqingpi/Chinese-Geo
 cd Chinese-Geo
 pip install -e .
 
-seogeo audit example.com                  # 体检：中文报告
-seogeo audit example.com --format json    # 体检：JSON（给 agent / CI）
-seogeo bots gen --sitemap https://example.com/sitemap.xml   # 生成推荐 robots.txt（国内各家单独成块）
-seogeo bots verify 116.179.32.160 Baiduspider               # 反向 DNS 校验爬虫 IP 真伪
-seogeo schema gen faqpage                 # 生成 JSON-LD 脚手架
-seogeo llms gen --title "示例科技"          # 生成 llms.txt 脚手架（主要面向海外引擎）
-seogeo init --site "示例科技"               # 一键打包 robots+llms+schema+canonical 清单 → seogeo-output/
-seogeo monitor prompts --industry "智能客服"     # 生成去品牌化问题（粘进各 AI 引擎收集回答）
+chinese-geo audit example.com                  # 体检：中文报告
+chinese-geo audit example.com --format json    # 体检：JSON（给 agent / CI）
+chinese-geo bots gen --sitemap https://example.com/sitemap.xml   # 生成推荐 robots.txt（国内各家单独成块）
+chinese-geo bots verify 116.179.32.160 Baiduspider               # 反向 DNS 校验爬虫 IP 真伪
+chinese-geo schema gen faqpage                 # 生成 JSON-LD 脚手架
+chinese-geo llms gen --title "示例科技"          # 生成 llms.txt 脚手架（主要面向海外引擎）
+chinese-geo init --site "示例科技"               # 一键打包 robots+llms+schema+canonical 清单 → chinese-geo-output/
+chinese-geo monitor prompts --industry "智能客服"     # 生成去品牌化问题（粘进各 AI 引擎收集回答）
 ```
 
 免安装直接跑：`python -m seogeo.cli audit example.com`
@@ -48,7 +48,7 @@ Claude Code 一键装成插件（含 6 个技能 + MCP），以及 Codex / Curso
 ### 示例输出
 
 ```
-# seogeo 体检报告：https://www.example.com
+# chinese-geo 体检报告：https://www.example.com
 **总分 20/100 · 等级：亟需整改**
 
 ## 优先级修复清单
@@ -71,14 +71,14 @@ Claude Code 一键装成插件（含 6 个技能 + MCP），以及 Codex / Curso
 - [ ] 行动清单：预期效果（量化）+ 影响哪些引擎 + 怎么验证
 - [x] 6 个 Agent Skill（vendor-neutral，跑在 Claude Code / Codex / CodeBuddy / Qoder / Kimi 等）：**optimize 全流程总入口** / audit 体检 / structure 结构 / content 文案 / offsite 站外+实体 / monitor 引用率·SoV
 - [x] 跨 Agent 指令层（`AGENTS.md` + `CLAUDE.md`，覆盖 Codex / opencode / Cursor / Trae / Kimi 等 30+ agent）
-- [x] MCP server（8 工具：audit / bots_gen / schema_gen / llms_gen / monitor_prompts / monitor_run / monitor_score / offsite；可选 `pip install Chinese-Geo[mcp]`，跑 `seogeo-mcp`）
+- [x] MCP server（8 工具：audit / bots_gen / schema_gen / llms_gen / monitor_prompts / monitor_run / monitor_score / offsite；可选 `pip install Chinese-Geo[mcp]`，跑 `chinese-geo-mcp`）
 - [x] Claude 插件一键装（`.claude-plugin/` plugin.json + marketplace + 根 `.mcp.json`）→ 见 [INSTALL.md](INSTALL.md)
-- [x] 跨 agent 一键接入：`seogeo init --agent <claude|codex|gemini|cursor|generic>`（写指令文件 + `.mcp.json`，不覆盖已有）
-- [x] Claude 斜杠命令（`/seogeo:audit` `/seogeo:monitor`，直接跑 CLI 注入结果）
+- [x] 跨 agent 一键接入：`chinese-geo init --agent <claude|codex|gemini|cursor|generic>`（写指令文件 + `.mcp.json`，不覆盖已有）
+- [x] Claude 斜杠命令（`/chinese-geo:audit` `/chinese-geo:monitor`，直接跑 CLI 注入结果）
 - [x] CI（GitHub Actions 跑 Python 3.9–3.12 测试）+ 打 GitHub Release 自动发 PyPI
-- [x] 引用率 / SoV 监控（零 key 手动抽样，中文友好，真 SoV）：`seogeo monitor` + seogeo-monitor Skill
-- [x] 站外矩阵 + 实体权威层（知乎 / CSDN / 公众号 / 小红书…）：`seogeo offsite` 确定性矩阵（按引擎×受众×开放/封闭）+ `seogeo-offsite` skill
-- [x] BYOK 监控自动跑引擎（自带 key 一条命令跑完各引擎）：`seogeo monitor run`
+- [x] 引用率 / SoV 监控（零 key 手动抽样，中文友好，真 SoV）：`chinese-geo monitor` + seogeo-monitor Skill
+- [x] 站外矩阵 + 实体权威层（知乎 / CSDN / 公众号 / 小红书…）：`chinese-geo offsite` 确定性矩阵（按引擎×受众×开放/封闭）+ `seogeo-offsite` skill
+- [x] BYOK 监控自动跑引擎（自带 key 一条命令跑完各引擎）：`chinese-geo monitor run`
 
 > ⚠️ 早期阶段（v0）。欢迎 issue / PR。
 

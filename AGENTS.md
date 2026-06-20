@@ -1,19 +1,19 @@
 # AGENTS.md — Chinese-Geo
 
-中文 / 国内生态优先的开源 SEO + GEO 工具（命令名 `seogeo`）。本文件给任何 AI 编程 Agent（Claude Code / Codex / opencode / CodeBuddy / Qoder / Kimi / Trae 等）读：知道这个项目是什么、怎么用、怎么开发。
+中文 / 国内生态优先的开源 SEO + GEO 工具（命令名 `chinese-geo`）。本文件给任何 AI 编程 Agent（Claude Code / Codex / opencode / CodeBuddy / Qoder / Kimi / Trae 等）读：知道这个项目是什么、怎么用、怎么开发。
 
 ## 这是什么
 确定性引擎（CLI，纯 Python 标准库、运行时零依赖）+ 中文判断层（Skill）。目标：让网站被国内 AI 引擎（豆包 / DeepSeek / 文心 / 通义 / 元宝 / Kimi）与海外主流（ChatGPT / Claude / Perplexity / Google AI）抓取与引用。
 
 ## CLI 命令
-- `seogeo audit <url> [--format md|json]` —— 7 维度 AI 可见性体检 → 中文报告 / JSON。
-- `seogeo bots gen [--sitemap <url>]` —— 生成推荐 robots.txt（国内爬虫各家单独成块）。
-- `seogeo bots verify <ip> <bot>` —— 反向 DNS 校验爬虫 IP 真伪。
-- `seogeo schema gen <type>` —— JSON-LD 脚手架（organization / article / faqpage / breadcrumb）。
-- `seogeo llms gen [--title <X>] [--summary <Y>]` —— llms.txt 脚手架（主要面向海外引擎；国内基本不读）。
-- `seogeo init [--site <X>] [--sitemap <url>]` —— 站点产物（robots + llms.txt + schema + canonical 清单）；`seogeo init --agent <claude|codex|gemini|cursor|generic>` —— 把 seogeo 接入某 agent（写指令文件 + .mcp.json，不覆盖已有）。
-- `seogeo monitor prompts --industry <X>` ｜ `monitor score --answers <f.json> --brand <X>`（零 key 手动）｜ `monitor run --industry <X> --brand <X>`（BYOK 自带 key 自动跑各引擎）—— 引用率 / SoV。
-- `seogeo offsite [--engine <豆包|元宝|文心|通义|DeepSeek|Kimi>] [--audience b2b|consumer]` —— 国内社媒/站外平台矩阵（按引擎×受众×开放/封闭 + 一题多发），差异化核心。
+- `chinese-geo audit <url> [--format md|json]` —— 7 维度 AI 可见性体检 → 中文报告 / JSON。
+- `chinese-geo bots gen [--sitemap <url>]` —— 生成推荐 robots.txt（国内爬虫各家单独成块）。
+- `chinese-geo bots verify <ip> <bot>` —— 反向 DNS 校验爬虫 IP 真伪。
+- `chinese-geo schema gen <type>` —— JSON-LD 脚手架（organization / article / faqpage / breadcrumb）。
+- `chinese-geo llms gen [--title <X>] [--summary <Y>]` —— llms.txt 脚手架（主要面向海外引擎；国内基本不读）。
+- `chinese-geo init [--site <X>] [--sitemap <url>]` —— 站点产物（robots + llms.txt + schema + canonical 清单）；`chinese-geo init --agent <claude|codex|gemini|cursor|generic>` —— 把 chinese-geo 接入某 agent（写指令文件 + .mcp.json，不覆盖已有）。
+- `chinese-geo monitor prompts --industry <X>` ｜ `monitor score --answers <f.json> --brand <X>`（零 key 手动）｜ `monitor run --industry <X> --brand <X>`（BYOK 自带 key 自动跑各引擎）—— 引用率 / SoV。
+- `chinese-geo offsite [--engine <豆包|元宝|文心|通义|DeepSeek|Kimi>] [--audience b2b|consumer]` —— 国内社媒/站外平台矩阵（按引擎×受众×开放/封闭 + 一题多发），差异化核心。
 
 未安装命令时用 `python -m seogeo.cli ...`（设 `PYTHONPATH=.`）。
 
