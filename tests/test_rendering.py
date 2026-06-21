@@ -7,13 +7,37 @@ from seogeo.rules.base import AuditContext
 from seogeo.rules.rendering import check_js_visibility
 
 
-def _ctx(html):
-    return AuditContext(url="https://x.com", html=html, dom=scan(html))
+def _ctx(html, rendered=None):
+    return AuditContext(url="https://x.com", html=html, dom=scan(html), rendered_html=rendered)
 
 
 def test_ssr_content_passes():
     html = "<html><body><h1>标题</h1><p>" + "实质内容" * 100 + "</p></body></html>"
     assert check_js_visibility(_ctx(html)).status == "pass"
+
+
+# —— D4：有 playwright 真渲染对比时，用确定证据替代启发式（注入、零网络） ——
+
+def test_rendered_confirms_js_shell_fails():
+    # raw 空壳但渲染后有实质内容 → 确定 CSR 空壳（比启发式更硬）
+    rendered = "<h1>标题</h1><p>" + "渲染后才出现的内容。" * 30 + "</p>"
+    out = check_js_visibility(_ctx('<div id="root"></div>', rendered))
+    assert out.status == "fail"
+    assert out.evidence["rendered_text_length"] >= 100
+    assert "确认" in out.message
+
+
+def test_rendered_both_thin_warns():
+    # raw 薄 + 渲染后仍薄 → 真的内容稀薄（warn，不武断判空壳）
+    out = check_js_visibility(_ctx('<div id="root"></div>', "<div></div>"))
+    assert out.status == "warn"
+
+
+def test_no_rendered_html_keeps_heuristic():
+    # rendered_html=None（默认）→ 原启发式不变：SSR 有内容 → pass
+    out = check_js_visibility(_ctx("<h1>t</h1><p>" + "字" * 200 + "</p>"))
+    assert out.status == "pass"
+    assert "rendered_text_length" not in out.evidence
 
 
 def test_empty_spa_shell_fails():

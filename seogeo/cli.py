@@ -33,7 +33,7 @@ from seogeo.structure_signals import analyze_structure, render_structure
 
 _USAGE = (
     "用法：\n"
-    "  chinese-geo audit <域名或URL> [--format md|json]\n"
+    "  chinese-geo audit <域名或URL> [--format md|json] [--render]   # --render 需 [render] extra（playwright），否则降级启发式\n"
     "  chinese-geo bots gen [--sitemap <url>] [--no-domestic] [--no-overseas]\n"
     "  chinese-geo bots verify <ip> <Baiduspider|Bytespider|PetalBot|Sogou web spider|YisouSpider>\n"
     "  chinese-geo schema gen <organization|article|faqpage|breadcrumb>\n"
@@ -62,7 +62,7 @@ def _cmd_audit(args: list) -> int:
         print(_USAGE)
         return 2
     fmt = _arg(args, "--format", "md")
-    result = audit_url(args[0])
+    result = audit_url(args[0], render="--render" in args)  # --render 需 [render] extra，否则降级
     print(render_json(result) if fmt == "json" else render_markdown(result))
     return 1 if any(r["priority"] == "Critical" for r in result.recommendations) else 0
 
