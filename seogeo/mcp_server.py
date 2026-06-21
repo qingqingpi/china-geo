@@ -76,7 +76,10 @@ def monitor_score(answers_json: str, brand: str, aliases: str = "", competitors:
         return {"error": f"answers_json 不是合法 JSON：{e}"}
     alias_list = [a.strip() for a in aliases.split(",") if a.strip()]
     comp = {c.strip(): [] for c in competitors.split(",") if c.strip()}
-    return score_answers(answers, brand, alias_list, comp)
+    try:
+        return score_answers(answers, brand, alias_list, comp)
+    except ValueError as e:
+        return {"error": str(e)}
 
 
 @mcp.tool()

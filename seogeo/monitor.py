@@ -80,11 +80,18 @@ def score_answers(answers: dict, brand: str, brand_aliases, competitors: dict) -
     competitors: {竞品名: [别名, ...]}
     返回: {引擎: {answered, brand_mentions, citation_rate, share_of_voice}, "_overall": {...}}
     """
+    if not isinstance(answers, dict):
+        raise ValueError("answers 必须是 {引擎: [回答文本, ...]} 形状的对象")
     brand_names = [brand] + list(brand_aliases or [])
     out: dict = {}
     for engine, texts in answers.items():
+        if not isinstance(texts, (list, tuple)):
+            raise ValueError(f"引擎「{engine}」的值必须是回答文本列表，例如 [\"回答1\", \"回答2\"]")
         answered = brand_hits_q = brand_total = comp_total = 0
         for t in texts:
+            if t is not None and not isinstance(t, str):
+                raise ValueError(
+                    f"引擎「{engine}」的回答必须是字符串（或 null 表示未答），收到 {type(t).__name__}")
             if not t or not t.strip():
                 continue
             answered += 1

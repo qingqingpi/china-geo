@@ -206,7 +206,12 @@ def _cmd_monitor(args: list) -> int:
         if not isinstance(answers, dict):
             print("错误：answers 文件顶层必须是 JSON 对象（{{引擎: [回答, ...]}}），不能是数组或其它类型")
             return 2
-        _print_score(score_answers(answers, brand, _csv(args, "--aliases"), competitors), brand)
+        try:
+            result = score_answers(answers, brand, _csv(args, "--aliases"), competitors)
+        except ValueError as e:
+            print(f"错误：{e}")
+            return 2
+        _print_score(result, brand)
         return 0
     if sub == "run":
         industry = _arg(args, "--industry")
