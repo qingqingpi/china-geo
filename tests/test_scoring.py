@@ -44,3 +44,17 @@ def test_band_thresholds():
     assert get_band(75) == "good"
     assert get_band(50) == "foundation"
     assert get_band(10) == "critical"
+
+
+# ---- E1-2: score_audit 出口 clamp ----
+
+def test_score_audit_clamps_over_100():
+    # score > max_score 的畸形数据：total 应 clamp 到 100，不返回超过 100 的值
+    outcomes = [_oc("domestic", "pass", 20, 10)]  # score=20 > max=10 → ratio=200%
+    assert score_audit(outcomes).total == 100
+
+
+def test_score_audit_clamps_negative_to_zero():
+    # score 为负的极端情形：total 应 clamp 到 0
+    outcomes = [_oc("domestic", "fail", -5, 10)]  # 负分 → 0
+    assert score_audit(outcomes).total == 0

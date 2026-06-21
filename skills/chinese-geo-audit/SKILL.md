@@ -1,5 +1,5 @@
 ---
-name: seogeo-audit
+name: chinese-geo-audit
 description: 当用户想检查或优化自己网站在 AI 引擎里的可见性时使用——"我的站在豆包/DeepSeek 上能不能被引用"、"AI 搜索优化"、"GEO/SEO 体检"、"AI 引不引用我"、"被 AI 抓取吗"、"怎么让 ChatGPT/文心提到我"。会运行 chinese-geo CLI 做确定性体检，再给出中文优先级行动清单。不用于：通用写作、与本站无关的泛泛 SEO 咨询。
 ---
 
@@ -48,8 +48,8 @@ description: 当用户想检查或优化自己网站在 AI 引擎里的可见性
 
 ## 诚实边界（务必如实告知用户）
 - 体检反映的是"我们的爬虫 UA 抓到的 HTML"；反爬站可能返回简化页，`content` / `structure` 可能被低估（`rendering` 的"可见文本很少"会提示这一点）。
-- 当前只测"能不能被抓 / 具备被引用的就绪度"，**不是真实引用率**——真实引用率 / SoV 用 `seogeo-monitor`（零 key 抽样）。
+- 当前只测"能不能被抓 / 具备被引用的就绪度"，**不是真实引用率**——真实引用率 / SoV 用 `chinese-geo-monitor`（零 key 抽样）。
 - 数值类提升是研究估计，按区间表述，**别承诺确数**。
 
 ## Next Best Skill
-按问题类型转交专项 skill：结构骨架 → `seogeo-structure`；文案改写 → `seogeo-content`；站外分发 + 实体权威 → `seogeo-offsite`；改完验证效果 → `seogeo-monitor`（引用率 / SoV）。
+按问题类型转交专项 skill：结构骨架 → `chinese-geo-structure`；文案改写 → `chinese-geo-content`；站外分发 + 实体权威 → `chinese-geo-offsite`；改完验证效果 → `chinese-geo-monitor`（引用率 / SoV）。

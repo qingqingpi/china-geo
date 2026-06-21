@@ -4,7 +4,7 @@
 /chat/completions，故一个泛化客户端 + 注册表即可覆盖国内外。HTTP 与 env 均可注入。
 
 诚实边界：这里调的是各引擎的 **API 模型**，默认不联网检索（Perplexity sonar 除外）；
-要测真实"联网引用"，仍以消费版手动粘贴为准（见 seogeo-monitor / `monitor prompts`+`score`）。
+要测真实"联网引用"，仍以消费版手动粘贴为准（见 chinese-geo-monitor / `monitor prompts`+`score`）。
 """
 from __future__ import annotations
 
@@ -45,8 +45,14 @@ ENGINES = {e.name: e for e in [
 def _http_post(url: str, headers: dict, payload: dict, timeout: int = 60) -> dict:
     data = json.dumps(payload).encode("utf-8")
     req = urllib.request.Request(url, data=data, headers=headers, method="POST")
-    with urllib.request.urlopen(req, timeout=timeout) as r:  # noqa: S310 (固定 https 引擎域名)
-        return json.loads(r.read().decode("utf-8"))
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as r:  # noqa: S310 (固定 https 引擎域名)
+            return json.loads(r.read().decode("utf-8"))
+    except urllib.error.HTTPError as e:
+        # 不把含 key 的 URL 带出去，只保留状态码与描述
+        raise RuntimeError(f"HTTP {e.code} {e.reason}") from None
+    except urllib.error.URLError as e:
+        raise RuntimeError(f"请求失败：{e.reason}") from None
 
 
 def available_engines(env=None) -> list:
@@ -82,7 +88,12 @@ def ask(engine_name: str, prompt: str, *, api_key: str | None = None,
     headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
     payload = {"model": model, "messages": [{"role": "user", "content": prompt}], "temperature": 0.3}
     resp = http(url, headers, payload)
-    return resp["choices"][0]["message"]["content"]
+    # 防御式解析：API 返回 {"error":...}、空 choices（内容过滤）或缺 message 时，
+    # 降级成空答案（计为未提及），镜像上方 Gemini 路径的写法
+    choices = resp.get("choices") or []
+    if not choices:
+        return ""
+    return (choices[0].get("message") or {}).get("content") or ""
 
 
 def run_matrix(prompts: list, engines=None, *, http=None, env=None) -> dict:

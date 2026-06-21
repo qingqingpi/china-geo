@@ -20,6 +20,9 @@ def render_html(url: str, timeout_ms: int = 15000) -> str | None:
     """取 JS 渲染后的 HTML；未装 playwright 或渲染失败 → None（调用方降级到 raw 启发式）。"""
     if not _AVAILABLE:
         return None
+    from seogeo.fetch import is_safe_url
+    if not is_safe_url(url):
+        return None
     try:  # pragma: no cover  （需真浏览器 + 联网，单测不覆盖；只测降级路径）
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)

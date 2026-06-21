@@ -92,7 +92,7 @@ def _is_root_allowed(group: _Group) -> bool:
     best_len = -1
     best_kind = None
     for kind, path in group.rules:
-        if path == "":  # 空 Disallow = 允许全部，不约束 '/'
+        if not path:  # 空 Disallow/Allow = 无路径约束，跳过（对称处理两种空值）
             continue
         if _matches(path, "/"):
             plen = len(path)
@@ -105,7 +105,11 @@ def _is_root_allowed(group: _Group) -> bool:
 
 
 def classify_bot(ua: str, robots_text: str) -> Classification:
-    """判断某 UA 在给定 robots.txt 下能否抓取站点根路径。"""
+    """判断某 UA 在给定 robots.txt 下能否抓取站点根路径。
+
+    ua 可含版本后缀（如 Googlebot/2.1），入口自动剥离斜杠后内容，仅用产品 token 匹配。
+    """
+    ua = ua.split("/")[0]  # 防御性剥离版本后缀：Googlebot/2.1 → Googlebot
     groups = parse_robots(robots_text)
     group, via_wildcard = _select_group(ua, groups)
     if group is None:

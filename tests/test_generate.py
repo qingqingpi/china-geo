@@ -52,6 +52,26 @@ def test_robots_can_skip_domestic():
     assert "Baiduspider" not in out
 
 
+# ---- E1-1: sitemap_url 注入防护 ----
+
+def test_robots_sitemap_injection_disallow_not_injected():
+    # 含换行的 sitemap_url 不应把额外内容当成有效 robots.txt 指令追加
+    out = generate_robots(sitemap_url="https://x.com/s.xml\nUser-agent: *\nDisallow: /")
+    assert "Disallow: /" not in out
+
+
+def test_robots_sitemap_injection_only_first_token_used():
+    # 取首个 token，不含后续注入内容
+    out = generate_robots(sitemap_url="https://x.com/s.xml\nUser-agent: *\nDisallow: /")
+    assert "Sitemap: https://x.com/s.xml" in out
+
+
+def test_robots_sitemap_non_http_ignored():
+    # 非 http(s):// 的 sitemap_url 被忽略，不出现在输出里
+    out = generate_robots(sitemap_url="ftp://x.com/s.xml")
+    assert "Sitemap:" not in out
+
+
 # ---- schema ----
 
 def test_schema_organization():

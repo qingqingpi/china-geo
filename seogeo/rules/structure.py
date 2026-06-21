@@ -38,6 +38,11 @@ def check_jsonld(ctx: AuditContext) -> CheckOutcome:
                        f"发现 {len(blocks)} 个 JSON-LD 块但解析失败（{parse_errors} 个）",
                        recommendation="修正 JSON-LD 语法错误，确保是合法 JSON",
                        evidence=evidence)
+    if not types and parse_errors == 0:
+        return outcome(RULE_ID, WEIGHT, "warn",
+                       f"已提供 JSON-LD（{len(blocks)} 个块）但未发现 @type —— AI 与搜索引擎难以识别实体类型",
+                       recommendation="为每个 JSON-LD 块补充 @type，如 Article / Organization / FAQPage 等",
+                       evidence=evidence)
     return outcome(RULE_ID, WEIGHT, "pass",
                    f"已提供 JSON-LD（类型：{', '.join(evidence['types']) or '未识别'}）",
                    evidence=evidence)

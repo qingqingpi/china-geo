@@ -1,6 +1,6 @@
 ---
-name: seogeo-structure
-description: 当用户想优化页面"结构/骨架"让 AI 更易抽取引用时使用——"内容 AI 抓了但不引用"、"怎么排版 AI 才爱用"、"答案胶囊/FAQ/表格怎么做"、"标题层级/分块"、"schema 和正文对不上"。先跑 chinese-geo audit/schema 看结构项，再给重排建议。不用于：纯文案改写（用 seogeo-content）、站外分发（用 seogeo-offsite）。
+name: chinese-geo-structure
+description: 当用户想优化页面"结构/骨架"让 AI 更易抽取引用时使用——"内容 AI 抓了但不引用"、"怎么排版 AI 才爱用"、"答案胶囊/FAQ/表格怎么做"、"标题层级/分块"、"schema 和正文对不上"。先跑 chinese-geo audit/schema 看结构项，再给重排建议。不用于：纯文案改写（用 chinese-geo-content）、站外分发（用 chinese-geo-offsite）。
 ---
 
 # chinese-geo · 结构优化（让 AI 抽得动、愿意引）
@@ -37,9 +37,9 @@ AI 引用的是"块"，不是整页。把页面拆成自包含、可直接抽取
 
 ## 诚实边界
 
-- 结构优化提升的是"可抽取性 / 就绪度"，不直接等于引用率；要配内容质量（seogeo-content）与站外权重（seogeo-offsite）。
+- 结构优化提升的是"可抽取性 / 就绪度"，不直接等于引用率；要配内容质量（chinese-geo-content）与站外权重（chinese-geo-offsite）。
 - 反爬站可能返回简化页，audit 的结构判定可能偏低（看 `rendering` 的"可见文本很少"提示）。
 
 ## Next Best Skill
 
-结构搭好 → `seogeo-content` 把文案改成可引用形态；想站外被引 → `seogeo-offsite`；验证效果 → `seogeo-monitor`。
+结构搭好 → `chinese-geo-content` 把文案改成可引用形态；想站外被引 → `chinese-geo-offsite`；验证效果 → `chinese-geo-monitor`。

@@ -27,8 +27,8 @@ def check_js_visibility(ctx: AuditContext) -> CheckOutcome:
     has_ssr_marker = any(m in html_low for m in _SSR_MARKERS)
     evidence = {"text_length": text_len, "headings": heads, "spa_root": has_spa_root}
 
-    # 有 playwright 真渲染对比（rendered_html 被填）→ 用确定证据替代启发式猜测
-    if ctx.rendered_html is not None and text_len < MIN_VISIBLE_CHARS:
+    # 有 playwright 真渲染对比（rendered_html 被填且非空）→ 用确定证据替代启发式猜测
+    if ctx.rendered_html and text_len < MIN_VISIBLE_CHARS:
         rendered_len = scan(ctx.rendered_html).text_length
         evidence["rendered_text_length"] = rendered_len
         if rendered_len >= MIN_VISIBLE_CHARS:

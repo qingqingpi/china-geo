@@ -49,3 +49,22 @@ def test_empty_spa_shell_fails():
 
 def test_id():
     assert check_js_visibility(_ctx("<p>x</p>")).id == "rendering-js-visibility"
+
+
+# ── Group D 修复：rendered_html="" 空串不应被当"有渲染数据" ──
+
+def test_empty_string_rendered_html_uses_heuristic():
+    """rendered_html="" 应走启发式分支（与 None 行为一致），不触发 playwright 对比路径。"""
+    # 充足内容 → 启发式判 pass，证明走的是启发式而非 playwright 路径
+    html = "<h1>标题</h1><p>" + "内容" * 100 + "</p>"
+    out = check_js_visibility(_ctx(html, rendered=""))
+    assert out.status == "pass"
+    assert "rendered_text_length" not in out.evidence
+
+
+def test_empty_string_rendered_spa_shell_heuristic_fail():
+    """rendered_html="" 且 raw 是 SPA 空壳 → 启发式 fail（与 rendered=None 行为一致）。"""
+    html = '<html><body><div id="root"></div></body></html>'
+    out = check_js_visibility(_ctx(html, rendered=""))
+    assert out.status == "fail"
+    assert "rendered_text_length" not in out.evidence

@@ -15,6 +15,8 @@ MIN_CHARS = 300
 def check_content_structure(ctx: AuditContext) -> CheckOutcome:
     if ctx.html_error:
         return html_unavailable(RULE_ID, WEIGHT, "内容结构")
+    if ctx.dom is None and not ctx.html_error:
+        return html_unavailable(RULE_ID, WEIGHT, "内容结构")
     d = ctx.dom
     signals = {
         "single_h1": bool(d) and d.headings["h1"] == 1,

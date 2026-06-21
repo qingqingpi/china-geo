@@ -1,4 +1,4 @@
-"""structure 确定性背书（D3，含 D2 的答案胶囊字数）：非评分结构信号，供 seogeo-structure SKILL 回调。
+"""structure 确定性背书（D3，含 D2 的答案胶囊字数）：非评分结构信号，供 chinese-geo-structure SKILL 回调。
 
 答案胶囊字数是经验范围、非硬标准（honesty calibration 0cd528b）——所以做成"信号 / advisory"，
 不进 audit 评分（不扣分、不污染总分）。

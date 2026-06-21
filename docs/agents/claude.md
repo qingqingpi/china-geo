@@ -24,7 +24,7 @@ chinese-geo init --agent claude
 - `.mcp.json` —— 注册 `chinese-geo` MCP 服务（需 `chinese-geo-mcp` 在 PATH）
 
 ## 3. 调法
-- **斜杠命令**：`/chinese-geo:seogeo-optimize`（全流程总入口）、`seogeo-audit` / `-structure` / `-content` / `-offsite` / `-monitor`；以及 `/chinese-geo:audit`、`/chinese-geo:monitor`。
+- **斜杠命令**：`/chinese-geo:chinese-geo-optimize`（全流程总入口）、`chinese-geo-audit` / `-structure` / `-content` / `-offsite` / `-monitor`；以及 `/chinese-geo:audit`、`/chinese-geo:monitor`。
 - **MCP 工具**：装了 `[mcp]` 后，`chinese-geo` 的 8 个工具（audit / bots_gen / schema_gen / llms_gen / monitor_* / offsite）可直接调。
 - **CLI 直调**（永远可用）：让 Claude 跑 `chinese-geo audit <你的域名>`。
 

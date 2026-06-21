@@ -17,8 +17,8 @@ def _readme() -> str:
 
 
 def _quickstart() -> str:
-    """截取「## 🚀 快速开始」到下一个标题（含 ###）之间的正文。"""
-    m = re.search(r"## 🚀 快速开始(.*?)(?:\n##|\Z)", _readme(), re.S)
+    """截取「## 快速开始」到下一个标题（含 ###）之间的正文。"""
+    m = re.search(r"## 快速开始(.*?)(?:\n##|\Z)", _readme(), re.S)
     assert m, "README 应有「## 🚀 快速开始」一节"
     return m.group(1)
 

@@ -40,3 +40,17 @@ def test_robots_error_warns():
 
 def test_id():
     assert check_overseas_bots(_ctx()).id == "overseas-bot-access"
+
+
+# ---- Bingbot 描述不再把 Bing 与 Copilot 简单并列 ----
+
+def test_bingbot_description_not_simple_copilot_pairing():
+    """Bingbot 描述不得再是 'Microsoft Bing / Copilot' 这类简单并列，
+    因为 Copilot 用独立 UA，不走 Bingbot。新描述须明确说明 Copilot 不走此 UA。"""
+    from seogeo.data.overseas_bots import OVERSEAS_BOTS
+    desc = OVERSEAS_BOTS["Bingbot"]
+    # 旧的简单并列串
+    assert desc != "Microsoft Bing / Copilot", "旧的简单并列描述未修改"
+    # 新描述必须提及 Copilot 不走此 UA
+    assert "Copilot" in desc and "不走" in desc, \
+        f"新描述应说明 Copilot 不走 Bingbot UA，实际: {desc!r}"

@@ -1,4 +1,4 @@
-"""结构信号：确定性、**非评分** advisory，给 seogeo-structure 判断层回调。
+"""结构信号：确定性、**非评分** advisory，给 chinese-geo-structure 判断层回调。
 
 把"答案胶囊字数 / FAQ / 表格存在"等结构信号下沉成确定性 CLI 能力（D3，含 D2 意图）。
 特意不进 audit 评分：答案胶囊字数是经验范围、非硬标准（honesty calibration 0cd528b），

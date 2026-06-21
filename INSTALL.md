@@ -24,7 +24,7 @@ pip install -e ".[mcp]"     # 想用 MCP 再加（得到 `chinese-geo-mcp`）
 /plugin install chinese-geo
 ```
 
-装上后 6 个技能自动可用：`/chinese-geo:seogeo-optimize`、`seogeo-audit`、`seogeo-structure`、`seogeo-content`、`seogeo-offsite`、`seogeo-monitor`；根目录 `.mcp.json` 里的 `chinese-geo` MCP 服务也会注册（需先 `pip install "Chinese-Geo[mcp]"`，让 `chinese-geo-mcp` 在 PATH 上）。
+装上后 6 个技能自动可用：`/chinese-geo:chinese-geo-optimize`、`chinese-geo-audit`、`chinese-geo-structure`、`chinese-geo-content`、`chinese-geo-offsite`、`chinese-geo-monitor`；根目录 `.mcp.json` 里的 `chinese-geo` MCP 服务也会注册（需先 `pip install "Chinese-Geo[mcp]"`，让 `chinese-geo-mcp` 在 PATH 上）。
 
 ### Codex / opencode / CodeBuddy / Qoder / Kimi / Cursor / Trae 等
 

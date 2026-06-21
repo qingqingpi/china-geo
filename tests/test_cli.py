@@ -117,3 +117,31 @@ def test_offsite_happy(capsys):
 def test_unknown_command_prints_usage(capsys):
     assert main(["frobnicate"]) == 2
     assert "用法" in capsys.readouterr().out
+
+
+# ---- E1-3: monitor score 文件读取健壮性 ----
+
+def test_monitor_score_file_not_found_exits_2(capsys):
+    # 文件不存在 → 退出码 2，中文提示，无裸 traceback
+    code = main(["monitor", "score", "--answers", "/不存在的文件_e1.json", "--brand", "某品牌"])
+    assert code == 2
+    out = capsys.readouterr().out
+    assert out  # 有提示输出，不是静默崩溃
+
+
+def test_monitor_score_bad_json_exits_2(tmp_path, capsys):
+    # 坏 JSON 文件 → 退出码 2
+    f = tmp_path / "bad.json"
+    f.write_text("{ this is not json", encoding="utf-8")
+    code = main(["monitor", "score", "--answers", str(f), "--brand", "某品牌"])
+    assert code == 2
+    assert capsys.readouterr().out  # 有提示
+
+
+def test_monitor_score_json_array_exits_2(tmp_path, capsys):
+    # 顶层是 JSON 数组而非 dict → 退出码 2
+    f = tmp_path / "arr.json"
+    f.write_text('["a", "b"]', encoding="utf-8")
+    code = main(["monitor", "score", "--answers", str(f), "--brand", "某品牌"])
+    assert code == 2
+    assert capsys.readouterr().out  # 有提示

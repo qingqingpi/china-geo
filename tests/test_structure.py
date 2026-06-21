@@ -26,3 +26,17 @@ def test_invalid_jsonld_warns():
 
 def test_id():
     assert check_jsonld(_ctx("")).id == "structure-jsonld"
+
+
+# ── Group D 修复：合法 JSON-LD 但无 @type 应 warn，不应 pass ──
+
+def test_valid_jsonld_without_type_warns():
+    """合法 JSON-LD 但无 @type → warn（AI/搜索无法识别结构意图）。"""
+    out = check_jsonld(_ctx('<script type="application/ld+json">{"name":"无类型实体"}</script>'))
+    assert out.status == "warn", f"期望 warn，实际 {out.status}"
+
+
+def test_valid_jsonld_with_type_still_passes():
+    """有 @type 的 JSON-LD 仍应 pass（回归测试，确保修复不破坏正常路径）。"""
+    out = check_jsonld(_ctx('<script type="application/ld+json">{"@type":"Article","name":"x"}</script>'))
+    assert out.status == "pass"

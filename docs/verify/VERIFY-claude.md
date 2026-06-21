@@ -21,7 +21,7 @@
 ## 3. Claude Code 原生调法
 - [ ] 一键插件：`/plugin marketplace add qingqingpi/Chinese-Geo` → `/plugin install chinese-geo` 成功
 - [ ] 斜杠命令 `/chinese-geo:audit <域名>` 跑通、注入体检结果
-- [ ] 技能可触发：`/chinese-geo:seogeo-optimize`（或 seogeo-audit 等 6 个）
+- [ ] 技能可触发：`/chinese-geo:chinese-geo-optimize`（或 chinese-geo-audit 等 6 个）
 - [ ] MCP 工具可调（audit / offsite / monitor_* 等 8 个）
 - 截图 / transcript：⏳ 待人工填
 

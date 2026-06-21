@@ -74,3 +74,18 @@ def test_robots_fetch_error_warns_not_false_pass():
     assert out.status == "warn"
     assert "403" in out.message
     assert out.evidence.get("robots_error") == "HTTP 403"
+
+
+# ── Group D 修复：只命中 1 家时 warn 文案不应含硬编码"两" ──
+
+def test_single_wildcard_risky_bot_message_no_hardcoded_liang():
+    """robots 只让 Bytespider 走 * 放行（Sogou 已显式放行）→ warn 文案不含"两"字。"""
+    robots = (
+        "User-agent: Sogou web spider\nDisallow:\n\n"
+        "User-agent: *\nDisallow:\n"
+    )
+    out = check_domestic_bots(_ctx(robots))
+    # 仅 Bytespider 在 wildcard_risky
+    assert out.status == "warn"
+    assert len(out.evidence["wildcard_risky"]) == 1
+    assert "两" not in out.message, f"文案含硬编码'两'：{out.message}"

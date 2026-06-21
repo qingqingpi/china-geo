@@ -6,6 +6,7 @@
 数据流：generate_prompts 出去品牌化问题 → 用户把各引擎回答粘回 → score_answers 算指标。
 """
 from __future__ import annotations
+import re
 
 # 去品牌化 prompt 模板（只含 {topic}，绝不含品牌名——让 AI 自己推荐，再看引不引你）
 _TEMPLATES = {
@@ -40,9 +41,22 @@ def generate_prompts(topic: str) -> list:
 
 
 def _count_occurrences(text: str, kw: str) -> int:
-    """大小写无关的子串计数（对中文有效；替代 gego 的大写正则）。"""
+    """大小写无关的关键词计数。
+
+    - ASCII 关键词：加词边界（前后无 A-Za-z0-9），防止前缀/后缀误匹配
+      （例：搜索 "DeepSeek" 不命中 "DeepSeeker"，搜索 "AI" 不命中 "AIsolution"）。
+    - 中文/混合关键词：保持子串匹配（CJK 字符无词边界概念；
+      注：过短或易撞词的中文品牌名请提供更具体的别名以减少误匹配）。
+    """
     if not kw:
         return 0
+    if kw.isascii():
+        pat = re.compile(
+            r'(?<![A-Za-z0-9])' + re.escape(kw) + r'(?![A-Za-z0-9])',
+            re.IGNORECASE,
+        )
+        return len(pat.findall(text))
+    # 中文/混合：大小写无关子串计数（对齐原有语义）
     lower, k = text.lower(), kw.lower()
     cnt, i = 0, 0
     while True:
@@ -87,8 +101,15 @@ def score_answers(answers: dict, brand: str, brand_aliases, competitors: dict) -
             "citation_rate": round(brand_hits_q / answered, 3) if answered else 0.0,
             "share_of_voice": round(brand_total / pool, 3) if pool else 0.0,
         }
-    rates = [v["citation_rate"] for v in out.values()]
-    out["_overall"] = {"citation_rate": round(sum(rates) / len(rates), 3) if rates else 0.0}
+    # _overall：按各引擎实际问答数加权，避免样本量悬殊时算术平均失真
+    total_answered = sum(v["answered"] for v in out.values())
+    total_hits = sum(
+        round(v["citation_rate"] * v["answered"])  # 还原命中题数（整数）
+        for v in out.values()
+    )
+    out["_overall"] = {
+        "citation_rate": round(total_hits / total_answered, 3) if total_answered else 0.0
+    }
     return out
 
 

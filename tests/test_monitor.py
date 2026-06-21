@@ -61,3 +61,46 @@ def test_verdict_tiers():
     assert verdict(0.05) == "差"
     assert verdict(0.2) == "良"
     assert verdict(0.5) == "优"
+
+
+# ---- 问题1：ASCII 品牌名词边界防误匹配 ----
+
+def test_ascii_brand_no_prefix_match():
+    """DeepSeeker 不应计入 DeepSeek 的匹配数。"""
+    assert count_mentions("DeepSeeker is awesome", ["DeepSeek"]) == 0
+
+
+def test_ascii_brand_no_infix_match():
+    """AIsolution 不应计入 AI 的匹配数。"""
+    assert count_mentions("AIsolution works great", ["AI"]) == 0
+
+
+def test_ascii_brand_counts_standalone():
+    """'DeepSeek 好，DeepSeek！' 应计 2 次。"""
+    assert count_mentions("DeepSeek 好，DeepSeek！", ["DeepSeek"]) == 2
+
+
+def test_chinese_brand_still_substring():
+    """中文 '通义' 在 '通义千问' 中仍计 1（CJK 子串保留）。"""
+    assert count_mentions("通义千问是阿里的产品", ["通义"]) == 1
+
+
+# ---- 问题2：_overall 按问答数加权，而非算术平均 ----
+
+def test_overall_weighted_by_sample_size():
+    """
+    引擎1：答10题、命中9题 → citation_rate = 0.9
+    引擎2：答1题、命中0题  → citation_rate = 0.0
+    算术平均 = (0.9 + 0.0) / 2 = 0.45（错误）
+    加权平均 = 9 / (10 + 1)  = 9/11 ≈ 0.818（正确）
+    """
+    # 引擎1：10 条回答，前 9 条含品牌、最后 1 条不含
+    answers_eng1 = ["推荐 我的品牌"] * 9 + ["竞品A 不错"]
+    # 引擎2：1 条回答，不含品牌
+    answers_eng2 = ["竞品A 就够了"]
+    answers = {"引擎1": answers_eng1, "引擎2": answers_eng2}
+    r = score_answers(answers, brand="我的品牌", brand_aliases=[], competitors={"竞品A": []})
+    expected = round(9 / 11, 3)
+    assert r["_overall"]["citation_rate"] == expected, (
+        f"期望加权 {expected}，实际 {r['_overall']['citation_rate']}"
+    )

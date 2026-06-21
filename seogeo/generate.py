@@ -31,7 +31,10 @@ def generate_robots(allow_domestic: bool = True, allow_overseas: bool = True,
         lines += ["Allow: /", ""]
     lines += ["User-agent: *", "Allow: /", ""]
     if sitemap_url:
-        lines.append(f"Sitemap: {sitemap_url}")
+        # 清洗：取首个空白分隔 token（防换行注入），并校验以 http(s):// 开头
+        _surl = sitemap_url.split()[0] if sitemap_url.split() else ""
+        if _surl.startswith(("http://", "https://")):
+            lines.append(f"Sitemap: {_surl}")
     return "\n".join(lines).rstrip() + "\n"
 
 

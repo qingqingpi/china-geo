@@ -191,8 +191,21 @@ def _cmd_monitor(args: list) -> int:
             print("需要 --answers <file.json> 和 --brand <品牌>")
             return 2
         competitors = {name: [] for name in _csv(args, "--competitors")}
-        with open(path, encoding="utf-8") as f:
-            answers = json.load(f)
+        try:
+            with open(path, encoding="utf-8") as f:
+                answers = json.load(f)
+        except FileNotFoundError:
+            print(f"错误：文件不存在——{path}")
+            return 2
+        except PermissionError:
+            print(f"错误：无权读取文件——{path}")
+            return 2
+        except (json.JSONDecodeError, ValueError) as e:
+            print(f"错误：文件不是合法 JSON——{e}")
+            return 2
+        if not isinstance(answers, dict):
+            print("错误：answers 文件顶层必须是 JSON 对象（{{引擎: [回答, ...]}}），不能是数组或其它类型")
+            return 2
         _print_score(score_answers(answers, brand, _csv(args, "--aliases"), competitors), brand)
         return 0
     if sub == "run":

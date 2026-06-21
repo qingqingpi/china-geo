@@ -113,3 +113,43 @@ def test_wildcard_on_subpath_does_not_block_root():
 def test_dollar_anchored_suffix_does_not_block_root():
     # Disallow: /*.pdf$ 只挡 .pdf 结尾，根路径仍可抓
     assert classify_bot("Baiduspider", "User-agent: *\nDisallow: /*.pdf$\n").status == "allowed"
+
+
+# ---- 3a：空 Allow: 行不改变判定结果 ----
+
+def test_empty_allow_line_does_not_affect_result_when_disallowed():
+    """含空 Allow: 行的 robots，封禁根路径行为不变（空 Allow 不应被当成匹配所有路径的规则）。"""
+    robots = "User-agent: Baiduspider\nDisallow: /\nAllow:\n"
+    c = classify_bot("Baiduspider", robots)
+    assert c.status == "blocked", "空 Allow: 不应覆盖 Disallow: /"
+
+
+def test_empty_allow_line_does_not_affect_result_when_allowed():
+    """含空 Allow: 行的 robots，无封禁时仍 allowed。"""
+    robots = "User-agent: Baiduspider\nDisallow:\nAllow:\n"
+    c = classify_bot("Baiduspider", robots)
+    assert c.status == "allowed"
+
+
+# ---- 3b：classify_bot 剥 UA 版本后缀 ----
+
+def test_classify_bot_strips_version_suffix_blocked():
+    """Googlebot/2.1 应与 Googlebot 判定结果一致（版本后缀不影响匹配）。"""
+    robots = "User-agent: Googlebot\nDisallow: /\n"
+    assert classify_bot("Googlebot/2.1", robots).status == "blocked"
+    assert classify_bot("Googlebot", robots).status == "blocked"
+
+
+def test_classify_bot_strips_version_suffix_allowed():
+    """含版本后缀的 UA 在明确放行时仍为 allowed。"""
+    robots = "User-agent: Googlebot\nDisallow:\n"
+    assert classify_bot("Googlebot/2.1", robots).status == "allowed"
+    assert classify_bot("Googlebot", robots).status == "allowed"
+
+
+def test_classify_bot_version_matches_wildcard():
+    """含版本后缀的 UA 走通配块时，via_wildcard 标志正确。"""
+    robots = "User-agent: *\nDisallow:\n"
+    c = classify_bot("Baiduspider/3.0", robots)
+    assert c.status == "allowed"
+    assert c.via_wildcard is True
