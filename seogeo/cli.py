@@ -124,10 +124,20 @@ def _init_agent(agent: str, out_dir: str) -> int:
         print(f"✅ 写入：{p}")
     for p in skipped:
         print(f"⏭ 已存在，跳过（如需可手动并入 chinese-geo 段）：{p}")
-    # 提示按 MCP 策略分流：引导型（kimi/qoder/lingma）写的是 MCP-SETUP-*.md，需手动；其余写了真配置文件
-    has_guide = any("MCP-SETUP" in os.path.basename(p) for p in wrote + skipped)
-    mcp_note = ("MCP 需手动配置：见写入的 MCP-SETUP-*.md（把其中 JSON 贴进设置面板 / 全局配置）"
-                if has_guide else "MCP 已配好：写入的配置文件里 chinese-geo 服务即可用")
+    # 提示按 MCP 策略分流。注意：MCP 配置文件若已存在会被跳过（不覆盖），此时 chinese-geo
+    # 并没有被并进去——不能谎称"已配好"，要提示用户手动并入。
+    _MCP_CFG = (".mcp.json", "opencode.json", "mcp.json")
+    wrote_bn = [os.path.basename(p) for p in wrote]
+    skip_bn = [os.path.basename(p) for p in skipped]
+    if any(b in _MCP_CFG for b in skip_bn) and not any(b in _MCP_CFG for b in wrote_bn):
+        mcp_note = ("MCP 未自动配置：检测到你已有 MCP 配置文件（未覆盖）——"
+                    "请手动把 chinese-geo 服务并入现有配置（见 INSTALL.md 的 MCP 段）")
+    elif any(b.startswith("MCP-SETUP") for b in wrote_bn):
+        mcp_note = "MCP 需手动配置：见写入的 MCP-SETUP-*.md（把其中 JSON 贴进设置面板 / 全局配置）"
+    elif any(b in _MCP_CFG for b in wrote_bn):
+        mcp_note = "MCP 已配好：写入的配置文件里 chinese-geo 服务即可用"
+    else:
+        mcp_note = "MCP：见 INSTALL.md 手动接入"
     print(f"\n{agent} 接入完成。{mcp_note}"
           "（需 pip install \"Chinese-Geo[mcp]\" 让 chinese-geo-mcp 在 PATH 上）。")
     return 0

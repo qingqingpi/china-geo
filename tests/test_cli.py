@@ -32,6 +32,15 @@ def test_init_agent_standard_message_says_mcp_ready(tmp_path, capsys):
     assert "已配好" in capsys.readouterr().out
 
 
+def test_init_agent_does_not_falsely_claim_mcp_ready_when_config_skipped(tmp_path, capsys):
+    # 用户已有 .mcp.json（常见）：不覆盖是对的，但 chinese-geo 没并进去 → 不能谎称"MCP 已配好"
+    (tmp_path / ".mcp.json").write_text('{"mcpServers": {}}', encoding="utf-8")
+    assert main(["init", "--agent", "claude", "--output", str(tmp_path)]) == 0
+    out = capsys.readouterr().out
+    assert "已配好" not in out   # 不谎称成功
+    assert "手动" in out         # 指向手动并入
+
+
 def test_demo_prints_before_after_comparison(capsys):
     # `chinese-geo demo`：内置 fixture 站前后分数对比（零 key、零网络）
     code = main(["demo"])
