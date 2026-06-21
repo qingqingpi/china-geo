@@ -2,6 +2,8 @@
 
 参考 Auriti `validators.py` 的 _BLOCKED_NETWORKS 思路，用 stdlib `ipaddress` 复刻。
 """
+from __future__ import annotations
+
 import gzip
 import io
 from unittest.mock import MagicMock, patch
