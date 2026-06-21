@@ -73,3 +73,145 @@ def test_run_matrix_skips_engines_without_key():
     out = run_matrix(["q"], engines=["deepseek", "openai"],
                      env={"DEEPSEEK_API_KEY": "x"}, http=_fake_http())
     assert set(out) == {"deepseek"}  # openai 无 key → 跳过
+
+
+# ---- D5：Gemini 原生协议 + 文心（Qianfan v2 兼容） ----
+
+def _fake_gemini_http(prefix="答案"):
+    def http(url, headers, payload):
+        http.calls.append({"url": url, "headers": headers, "payload": payload})
+        text = payload["contents"][0]["parts"][0]["text"]
+        return {"candidates": [{"content": {"parts": [{"text": f"{prefix}:{text}"}]}}]}
+    http.calls = []
+    return http
+
+
+def test_registry_includes_gemini_and_ernie():
+    assert "gemini" in ENGINES and "ernie" in ENGINES
+    assert ENGINES["gemini"].protocol == "gemini"
+    assert ENGINES["ernie"].protocol == "openai"  # 文心走百度千帆 v2 OpenAI 兼容端点
+
+
+def test_ask_gemini_native_request_and_parse():
+    http = _fake_gemini_http("回答")
+    out = ask("gemini", "你好", api_key="gk", http=http)
+    assert out == "回答:你好"
+    c = http.calls[0]
+    assert ":generateContent" in c["url"] and "key=gk" in c["url"]  # query key，非 Bearer
+    assert "Authorization" not in c["headers"]
+    assert c["payload"]["contents"][0]["parts"][0]["text"] == "你好"
+
+
+def test_ask_ernie_uses_openai_compatible_qianfan_v2():
+    http = _fake_http("回答")
+    out = ask("ernie", "你好", api_key="qk", http=http)
+    assert out == "回答:你好"
+    c = http.calls[0]
+    assert c["url"].startswith("https://qianfan.baidubce.com/v2")
+    assert c["url"].endswith("/chat/completions")
+    assert c["headers"]["Authorization"] == "Bearer qk"
+
+
+def test_available_engines_includes_gemini_and_ernie():
+    avail = available_engines(env={"GEMINI_API_KEY": "x", "QIANFAN_API_KEY": "y"})
+    assert "gemini" in avail and "ernie" in avail
+
+
+def test_gemini_blocked_empty_candidates_no_crash():
+    # Gemini 安全过滤 → candidates:[]，不该崩，返回空答案（计为未提及）
+    http = lambda url, headers, payload: {"candidates": []}
+    assert ask("gemini", "q", api_key="k", http=http) == ""
+
+
+def test_gemini_candidate_without_content_no_crash():
+    # finishReason=SAFETY 的候选无 content 键 → 不该 KeyError
+    http = lambda url, headers, payload: {"candidates": [{"finishReason": "SAFETY"}]}
+    assert ask("gemini", "q", api_key="k", http=http) == ""
+
+
+def test_run_matrix_mixes_protocols():
+    # 同一矩阵里 gemini（原生）与 deepseek（兼容）都能跑，回答正确归位
+    def http(url, headers, payload):
+        if ":generateContent" in url:
+            t = payload["contents"][0]["parts"][0]["text"]
+            return {"candidates": [{"content": {"parts": [{"text": "G:" + t}]}}]}
+        t = payload["messages"][0]["content"]
+        return {"choices": [{"message": {"content": "D:" + t}}]}
+    env = {"GEMINI_API_KEY": "g", "DEEPSEEK_API_KEY": "d"}
+    out = run_matrix(["问"], engines=["gemini", "deepseek"], http=http, env=env)
+    assert out["gemini"] == ["G:问"] and out["deepseek"] == ["D:问"]
+
+
+# ---- 问题1：OpenAI 兼容路径防御式解析 ----
+
+def test_ask_openai_error_response_returns_empty():
+    # API 返回 {"error": {...}} 时，choices 不存在，应返回 "" 而非抛 KeyError
+    http = lambda url, headers, payload: {"error": {"message": "rate limit"}}
+    result = ask("deepseek", "q", api_key="sk-x", http=http)
+    assert result == ""
+
+
+def test_ask_openai_empty_choices_returns_empty():
+    # 内容过滤导致 choices 为 []，应返回 "" 而非抛 IndexError
+    http = lambda url, headers, payload: {"choices": []}
+    result = ask("deepseek", "q", api_key="sk-x", http=http)
+    assert result == ""
+
+
+def test_ask_openai_missing_message_returns_empty():
+    # choices 存在但首条缺 "message" 键，应返回 "" 而非抛 KeyError
+    http = lambda url, headers, payload: {"choices": [{"finish_reason": "content_filter"}]}
+    result = ask("deepseek", "q", api_key="sk-x", http=http)
+    assert result == ""
+
+
+# ---- 问题2：Gemini key 泄露防护 ----
+
+def test_http_post_httperror_strips_key():
+    """_http_post 遇到 HTTPError 时，抛出的 RuntimeError 里不含原 URL（含 key 参数）。"""
+    import urllib.error
+    import urllib.request
+    from seogeo.engines import _http_post
+
+    FAKE_KEY = "super-secret-gemini-key-12345"
+    url_with_key = f"https://generativelanguage.googleapis.com/v1beta/models/gemini:generateContent?key={FAKE_KEY}"
+    fake_fp = None
+
+    orig_urlopen = urllib.request.urlopen
+
+    def bad_urlopen(req, timeout=None):
+        raise urllib.error.HTTPError(
+            url=url_with_key, code=403, msg="Forbidden", hdrs={}, fp=fake_fp
+        )
+
+    urllib.request.urlopen = bad_urlopen
+    try:
+        with pytest.raises(RuntimeError) as exc_info:
+            _http_post(url_with_key, {"Content-Type": "application/json"}, {})
+        assert FAKE_KEY not in str(exc_info.value)
+        assert url_with_key not in str(exc_info.value)
+    finally:
+        urllib.request.urlopen = orig_urlopen
+
+
+def test_http_post_urlerror_strips_url():
+    """_http_post 遇到 URLError 时，抛出的 RuntimeError 里不含原 URL（含 key 参数）。"""
+    import urllib.error
+    import urllib.request
+    from seogeo.engines import _http_post
+
+    FAKE_KEY = "secret-key-url-error-test"
+    url_with_key = f"https://example.com/api?key={FAKE_KEY}"
+
+    orig_urlopen = urllib.request.urlopen
+
+    def bad_urlopen(req, timeout=None):
+        raise urllib.error.URLError("Connection refused")
+
+    urllib.request.urlopen = bad_urlopen
+    try:
+        with pytest.raises(RuntimeError) as exc_info:
+            _http_post(url_with_key, {}, {})
+        assert FAKE_KEY not in str(exc_info.value)
+    finally:
+        urllib.request.urlopen = orig_urlopen

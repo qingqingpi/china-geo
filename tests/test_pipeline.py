@@ -68,3 +68,28 @@ def test_outcomes_carry_category_from_registry():
     assert cats["domestic-bot-access"] == "domestic"
     assert cats["structure-jsonld"] == "structure"
     assert cats["rendering-js-visibility"] == "rendering"
+
+
+# 依赖首页 HTML/DOM 的 7 条规则——抓取失败时不能拿空 HTML 假打分
+_HTML_DEPENDENT_RULES = [
+    "content-structure", "structure-jsonld", "structure-opengraph",
+    "content-freshness", "rendering-js-visibility", "technical-lang", "technical-viewport",
+]
+
+
+def test_html_fetch_failure_warns_dependent_rules_not_fail():
+    # 首页 HTML 抓取失败（DNS/网络/SSRF guard）：依赖 HTML 的规则应 warn"无法获取 HTML"，
+    # 不能 fail 成"页面没内容/缺 H1/缺 schema/0 字"——否则把"抓不到"误判成"页面质量差"
+    ctx = AuditContext(url="https://example.com", html="", html_error="DNS resolution failed",
+                       robots_txt=_ALL_ALLOW, sitemap_xml="<urlset></urlset>")
+    by_id = {o.id: o for o in run_audit(ctx).outcomes}
+    for rid in _HTML_DEPENDENT_RULES:
+        assert by_id[rid].status == "warn", f"{rid} 应 warn 而非 {by_id[rid].status}"
+        assert "无法获取首页 HTML" in by_id[rid].message, rid
+
+
+def test_html_present_no_error_still_scores_normally():
+    # 边界：HTML 正常时不受影响，"全好站"仍满分（html_error 守卫不能误伤正常路径）
+    ctx = AuditContext(url="https://example.com", robots_txt=_ALL_ALLOW,
+                       sitemap_xml="<urlset></urlset>", html=_GOOD_HTML)
+    assert run_audit(ctx).score == 100

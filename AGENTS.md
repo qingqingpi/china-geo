@@ -11,19 +11,21 @@
 - `chinese-geo bots verify <ip> <bot>` —— 反向 DNS 校验爬虫 IP 真伪。
 - `chinese-geo schema gen <type>` —— JSON-LD 脚手架（organization / article / faqpage / breadcrumb）。
 - `chinese-geo llms gen [--title <X>] [--summary <Y>]` —— llms.txt 脚手架（主要面向海外引擎；国内基本不读）。
-- `chinese-geo init [--site <X>] [--sitemap <url>]` —— 站点产物（robots + llms.txt + schema + canonical 清单）；`chinese-geo init --agent <claude|codex|gemini|cursor|generic>` —— 把 chinese-geo 接入某 agent（写指令文件 + .mcp.json，不覆盖已有）。
+- `chinese-geo init [--site <X>] [--sitemap <url>]` —— 站点产物（robots + llms.txt + schema + canonical 清单）；`chinese-geo init --agent <claude|codex|gemini|cursor|generic|codebuddy|kimi|opencode|qoder|trae|lingma>` —— 把 chinese-geo 接入某 agent（写指令文件 + MCP 配置或手动指引，不覆盖已有）。
 - `chinese-geo monitor prompts --industry <X>` ｜ `monitor score --answers <f.json> --brand <X>`（零 key 手动）｜ `monitor run --industry <X> --brand <X>`（BYOK 自带 key 自动跑各引擎）—— 引用率 / SoV。
 - `chinese-geo offsite [--engine <豆包|元宝|文心|通义|DeepSeek|Kimi>] [--audience b2b|consumer]` —— 国内社媒/站外平台矩阵（按引擎×受众×开放/封闭 + 一题多发），差异化核心。
+- `chinese-geo structure <url> [--format md|json]` —— 确定性结构信号（答案胶囊字数 / FAQ / 表格 / 标题层级），**非评分** advisory，供 chinese-geo-structure 判断层回调。
+- `chinese-geo demo` —— 内置 fixture 站「体检→修复→复检」前后分数对比（零 key、零网络、可复现的最小自证）。
 
 未安装命令时用 `python -m seogeo.cli ...`（设 `PYTHONPATH=.`）。
 
 ## Skills（判断层，跑在 Agent 里）
-- `skills/seogeo-optimize/SKILL.md` —— **全流程总入口**：用户要"从头到尾完整做一遍 GEO / AI 可见性优化"时，按六阶段编排，逐段委派下面的专项 skill。
-- `skills/seogeo-audit/SKILL.md` —— AI 可见性体检：调 `audit` → 出中文行动清单。
-- `skills/seogeo-structure/SKILL.md` —— 页面结构 / 骨架（答案胶囊、FAQ、表格、schema 对齐）：调 `audit` / `schema`。
-- `skills/seogeo-content/SKILL.md` —— 文案改写成可引用形态（结论前置、加数据 / 引文）：几乎纯判断。
-- `skills/seogeo-offsite/SKILL.md` —— 站外平台矩阵 + 实体权威层（知乎 / CSDN / 公众号 / 百度百科、sameAs / NAP）。
-- `skills/seogeo-monitor/SKILL.md` —— 测引用率 / SoV / GEO 有没有效果：生成问题 → 用户粘回各引擎回答 → 算指标。
+- `skills/chinese-geo-optimize/SKILL.md` —— **全流程总入口**：用户要"从头到尾完整做一遍 GEO / AI 可见性优化"时，按六阶段编排，逐段委派下面的专项 skill。
+- `skills/chinese-geo-audit/SKILL.md` —— AI 可见性体检：调 `audit` → 出中文行动清单。
+- `skills/chinese-geo-structure/SKILL.md` —— 页面结构 / 骨架（答案胶囊、FAQ、表格、schema 对齐）：调 `audit` / `schema`。
+- `skills/chinese-geo-content/SKILL.md` —— 文案改写成可引用形态（结论前置、加数据 / 引文）：几乎纯判断。
+- `skills/chinese-geo-offsite/SKILL.md` —— 站外平台矩阵 + 实体权威层（知乎 / CSDN / 公众号 / 百度百科、sameAs / NAP）。
+- `skills/chinese-geo-monitor/SKILL.md` —— 测引用率 / SoV / GEO 有没有效果：生成问题 → 用户粘回各引擎回答 → 算指标。
 
 SKILL.md 是纯 vendor-neutral Markdown，可移植到任何支持 Agent Skills 的 runtime；不支持的 agent，直接调上面的 CLI 也能拿到主要价值。
 

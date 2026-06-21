@@ -33,19 +33,27 @@ def fetch_text(url: str):
     return None, f"HTTP {resp['status']}"
 
 
-def audit_url(url: str) -> AuditResult:
+def audit_url(url: str, render: bool = False) -> AuditResult:
     origin = origin_of(url)
-    html, _ = fetch_text(origin)
+    html, html_error = fetch_text(origin)  # 保留首页抓取错误，别让"抓不到"被当成"空页面"假打分
+    if html is None and html_error is None:  # 首页 404：fetch_text 把 404 映射成 (None, None)；
+        html_error = "首页返回 404 或无内容"  # 对首页而言这是"抓不到"，不是"页面真空白"，须让守卫生效
     robots_txt, robots_error = fetch_text(origin + "/robots.txt")
     llms_txt, _ = fetch_text(origin + "/llms.txt")
     sitemap_xml, _ = fetch_text(origin + "/sitemap.xml")
+
+    rendered_html = None
+    if render:  # 可选：装了 [render] extra 才会真渲染；否则降级 None，rendering 规则退回启发式
+        from seogeo import render as render_mod
+        rendered_html = render_mod.render_html(origin)
 
     bytespider_blocked = None
     if robots_txt and classify_bot("Bytespider", robots_txt).status == "blocked":
         bytespider_blocked = probe_bytespider_blocked(origin)
 
-    ctx = AuditContext(url=origin, html=html or "",
+    ctx = AuditContext(url=origin, html=html or "", html_error=html_error,
                        robots_txt=robots_txt, robots_error=robots_error,
                        llms_txt=llms_txt, sitemap_xml=sitemap_xml,
+                       rendered_html=rendered_html,
                        bytespider_blocked=bytespider_blocked)
     return run_audit(ctx)

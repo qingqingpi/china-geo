@@ -25,25 +25,37 @@ mcp = FastMCP("chinese-geo")
 @mcp.tool()
 def audit(url: str) -> str:
     """对网站做 AI 可见性体检（国内 + 海外 AI 引擎），返回中文报告（含打分与优先级修复清单）。"""
-    return render_markdown(audit_url(url))
+    try:
+        return render_markdown(audit_url(url))
+    except Exception as e:
+        return f"错误：{e}"
 
 
 @mcp.tool()
 def bots_gen(sitemap_url: str = "") -> str:
     """生成推荐 robots.txt——放行主流 AI 爬虫，国内爬虫各家单独成块。"""
-    return generate_robots(sitemap_url=sitemap_url or None)
+    try:
+        return generate_robots(sitemap_url=sitemap_url or None)
+    except Exception as e:
+        return f"错误：{e}"
 
 
 @mcp.tool()
 def schema_gen(schema_type: str) -> str:
     """生成 JSON-LD 脚手架。schema_type ∈ organization / article / faqpage / breadcrumb。"""
-    return generate_schema(schema_type)
+    try:
+        return generate_schema(schema_type)
+    except ValueError as e:  # 坏 schema_type 返回可读错误串，别抛异常崩工具
+        return f"错误：{e}"
 
 
 @mcp.tool()
 def llms_gen(title: str, summary: str = "") -> str:
     """生成 llms.txt 脚手架（主要面向海外 AI 引擎；国内引擎基本不读，靠 robots 准入 + 站外分发）。"""
-    return generate_llms(title, summary or None)
+    try:
+        return generate_llms(title, summary or None)
+    except Exception as e:
+        return f"错误：{e}"
 
 
 @mcp.tool()
@@ -64,7 +76,10 @@ def monitor_score(answers_json: str, brand: str, aliases: str = "", competitors:
         return {"error": f"answers_json 不是合法 JSON：{e}"}
     alias_list = [a.strip() for a in aliases.split(",") if a.strip()]
     comp = {c.strip(): [] for c in competitors.split(",") if c.strip()}
-    return score_answers(answers, brand, alias_list, comp)
+    try:
+        return score_answers(answers, brand, alias_list, comp)
+    except ValueError as e:
+        return {"error": str(e)}
 
 
 @mcp.tool()
@@ -77,12 +92,15 @@ def monitor_run(industry: str, brand: str, engines: str = "",
     """
     if not available_engines():
         return {"error": "没有可用引擎：请在环境变量配置至少一个 API key（如 DEEPSEEK_API_KEY）。"}
-    only = [e.strip() for e in engines.split(",") if e.strip()] or None
-    prompts = [p["text"] for p in generate_prompts(industry)]
-    answers = run_matrix(prompts, engines=only)
-    alias_list = [a.strip() for a in aliases.split(",") if a.strip()]
-    comp = {c.strip(): [] for c in competitors.split(",") if c.strip()}
-    return score_answers(answers, brand, alias_list, comp)
+    try:
+        only = [e.strip() for e in engines.split(",") if e.strip()] or None
+        prompts = [p["text"] for p in generate_prompts(industry)]
+        answers = run_matrix(prompts, engines=only)
+        alias_list = [a.strip() for a in aliases.split(",") if a.strip()]
+        comp = {c.strip(): [] for c in competitors.split(",") if c.strip()}
+        return score_answers(answers, brand, alias_list, comp)
+    except Exception as e:
+        return {"error": str(e)}
 
 
 @mcp.tool()

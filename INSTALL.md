@@ -13,7 +13,7 @@ pip install -e .            # 得到 `chinese-geo` 命令（纯标准库）
 pip install -e ".[mcp]"     # 想用 MCP 再加（得到 `chinese-geo-mcp`）
 ```
 
-装完，任何 agent 都能直接 shell 调：`chinese-geo audit example.com`。
+装完先跑 `chinese-geo demo` 自证（零 key、零网络，看内置差站「体检 → 修复 → 复检」的前后分数对比）；之后任何 agent 都能直接 shell 调，例如 `chinese-geo audit example.com`。更多开发者级样例（差站 fixture + quickstart 脚本 + 真实样例报告）见 [`examples/`](examples/)。
 
 ## 第 2 步：各 agent 原生集成（可选）
 
@@ -24,7 +24,7 @@ pip install -e ".[mcp]"     # 想用 MCP 再加（得到 `chinese-geo-mcp`）
 /plugin install chinese-geo
 ```
 
-装上后 6 个技能自动可用：`/chinese-geo:seogeo-optimize`、`seogeo-audit`、`seogeo-structure`、`seogeo-content`、`seogeo-offsite`、`seogeo-monitor`；根目录 `.mcp.json` 里的 `chinese-geo` MCP 服务也会注册（需先 `pip install "Chinese-Geo[mcp]"`，让 `chinese-geo-mcp` 在 PATH 上）。
+装上后 6 个技能自动可用：`/chinese-geo:chinese-geo-optimize`、`chinese-geo-audit`、`chinese-geo-structure`、`chinese-geo-content`、`chinese-geo-offsite`、`chinese-geo-monitor`；根目录 `.mcp.json` 里的 `chinese-geo` MCP 服务也会注册（需先 `pip install "Chinese-Geo[mcp]"`，让 `chinese-geo-mcp` 在 PATH 上）。
 
 ### Codex / opencode / CodeBuddy / Qoder / Kimi / Cursor / Trae 等
 
@@ -39,7 +39,12 @@ pip install -e ".[mcp]"     # 想用 MCP 再加（得到 `chinese-geo-mcp`）
 - **支持 Agent Skills 的**（Codex / CodeBuddy / Kimi 等）：`skills/*/SKILL.md` 是 vendor-neutral 纯 Markdown，放进该 agent 的 skills 目录即可。
 - **都不支持的**（如 Cursor）：直接 `chinese-geo <命令>` 命令行也能拿到约 80% 价值。
 
-> **懒人快捷**：在你的项目根跑 `chinese-geo init --agent <claude|codex|gemini|cursor|generic>`，自动写好该 agent 的指令文件（`CLAUDE.md` / `AGENTS.md` / `GEMINI.md` / `.cursor/rules/seogeo.mdc`）+ `.mcp.json`；已存在的文件不会被覆盖。
+> **懒人快捷**：在你的项目根跑 `chinese-geo init --agent <claude|codex|gemini|cursor|generic|codebuddy|kimi|opencode|qoder|trae|lingma>`，自动写好该 agent 的指令文件（如 `CLAUDE.md` / `AGENTS.md` / `CODEBUDDY.md` / `.cursor/rules/seogeo.mdc` / `.trae/rules/project_rules.md`）+ 对应 MCP 配置（`.mcp.json` / `opencode.json` / `.trae/mcp.json`）或手动接入指引（UI-only 的 Qoder/Lingma、全局的 Kimi 给 `MCP-SETUP-*.md`）；已存在的文件不会被覆盖。
+
+> **每个 agent 的详细用法卡**（装法 + 调法 + 真实 CLI 输出样例 + 预期看到什么）见 [`docs/agents/`](docs/agents/)：
+> [claude](docs/agents/claude.md) / [codex](docs/agents/codex.md) / [codebuddy](docs/agents/codebuddy.md) / [kimi](docs/agents/kimi.md) / [opencode](docs/agents/opencode.md) / [qoder](docs/agents/qoder.md) / [trae](docs/agents/trae.md) / [lingma](docs/agents/lingma.md)。
+>
+> 想在真 agent 里实跑验收？每家配了**人工验证清单** [`docs/verify/`](docs/verify/)（`VERIFY-<agent>.md`：勾选 + 贴 transcript/截图的模板）。
 
 ## 分层一览
 

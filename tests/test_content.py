@@ -32,3 +32,12 @@ def test_partial_warns():
 
 def test_id():
     assert check_content_structure(_ctx("")).id == "content-structure"
+
+
+# ── Group D 修复：dom=None 且 html_error 未设时应 warn，不应 fail ──
+
+def test_dom_none_no_html_error_warns_not_fails():
+    """dom=None 且 html_error=None → html_unavailable warn（非 fail）。"""
+    ctx = AuditContext(url="https://x.com", dom=None, html_error=None)
+    out = check_content_structure(ctx)
+    assert out.status == "warn", f"期望 warn，实际 {out.status}"

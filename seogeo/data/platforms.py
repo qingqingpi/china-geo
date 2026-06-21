@@ -18,14 +18,17 @@ class Platform:
     name: str
     engines: tuple      # 喂哪些国内 AI 引擎（豆包/元宝/文心/通义/DeepSeek/Kimi）
     audiences: tuple    # "b2b"（B2B/科技）/ "consumer"（消费/生活），可多
-    open: bool          # True=公网可被外部搜索索引；False=封闭，需做平台内 SEO
+    open: bool          # True=能被百度/Bing/Google 等外部主流搜索广泛索引（公开内容可抓）；
+                        # False=封闭或近封闭：仅被自家/单一搜索索引，外部主流搜不到正文，
+                        #       需做平台内 SEO 而非仅靠外部链接传递权重。
     tip: str
     indexed_by: str = ""  # 被哪些 websearch 索引（决定能喂到哪个引擎的联网后端）
 
 
 DOMESTIC_PLATFORMS = (
-    Platform("微信公众号", ("元宝",), ("b2b", "consumer"), True,
-             "元宝主力（约占其引用一半）", indexed_by="搜狗独家（微信搜一搜=搜狗；外部百度/Google 基本搜不到正文）"),
+    Platform("微信公众号", ("元宝",), ("b2b", "consumer"), False,
+             "元宝主力（约占其引用一半）；仅搜狗/微信搜一搜可见，需配合在平台内持续更新以维持元宝引用",
+             indexed_by="搜狗独家（微信搜一搜=搜狗；外部百度/Google 基本搜不到正文）"),
     Platform("知乎", ("DeepSeek", "Kimi", "文心"), ("b2b", "consumer"), True,
              "跨引擎高价值，重论证", indexed_by="百度 / Bing / Google / 搜狗（广泛）"),
     Platform("CSDN", ("DeepSeek", "Kimi", "文心"), ("b2b",), True,
@@ -48,6 +51,7 @@ DOMESTIC_PLATFORMS = (
              '自家"点点"只引小红书 → 也要做平台内', indexed_by="站内 / 点点（近封闭）；外部收录极少（robots 严 + 登录墙）"),
     Platform("B站", ("豆包", "通义"), ("consumer", "b2b"), True,
              "视频 + 图文，科技区偏 b2b", indexed_by="百度 / Bing / Google（广泛）"),
-    Platform("视频号", ("元宝",), ("consumer",), True,
-             "腾讯系，喂元宝", indexed_by="微信搜一搜（搜狗系）；外部弱"),
+    Platform("视频号", ("元宝",), ("consumer",), False,
+             "腾讯系，喂元宝；仅微信搜一搜（搜狗系）可见，外部主流搜索基本无法索引，需配合平台内运营",
+             indexed_by="微信搜一搜（搜狗系）；外部弱，外部主流搜索不可广泛索引"),
 )

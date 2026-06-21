@@ -32,5 +32,12 @@ def test_disallowed_unprobed_warns():
     assert check_bytespider_enforce(ctx).status == "warn"
 
 
+def test_robots_error_warns_cannot_judge():
+    # 抓 robots.txt 失败（DNS/网络/403）→ 无法判定 Bytespider 是否被封禁，应 warn，不能 pass 成"未封禁"
+    out = check_bytespider_enforce(AuditContext(url="x", robots_error="DNS failed"))
+    assert out.status == "warn"
+    assert "robots" in out.message
+
+
 def test_id():
     assert check_bytespider_enforce(AuditContext(url="x")).id == "domestic-bytespider-enforce"

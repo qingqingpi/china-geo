@@ -1,5 +1,5 @@
 ---
-name: seogeo-optimize
+name: chinese-geo-optimize
 description: 当用户想"从头到尾完整做一遍"网站的 AI 可见性 / GEO / SEO 优化时使用——"全面提升 AI 可见性"、"把站从头到尾做一遍 GEO"、"完整 GEO 流程怎么走"、"AI 搜索优化全套"、"不知从哪下手带我走一遍"。这是总入口：按阶段编排，逐段委派给 audit / structure / content / offsite / monitor 专项 skill 与 chinese-geo CLI。不用于：只做单一环节（直接用对应专项 skill）。
 ---
 
@@ -16,7 +16,7 @@ description: 当用户想"从头到尾完整做一遍"网站的 AI 可见性 / G
 ## 阶段拆解
 
 ### 阶段 1 · 体检定位（确定性）
-跑 `chinese-geo audit <域名> --format json`，拿到 `score` / `band` / `recommendations`。委派 **`seogeo-audit`** 出中文行动清单。**先看有没有 Critical（尤其国内爬虫被挡）——有就先修，别的先放。**
+跑 `chinese-geo audit <域名> --format json`，拿到 `score` / `band` / `recommendations`。委派 **`chinese-geo-audit`** 出中文行动清单。**先看有没有 Critical（尤其国内爬虫被挡）——有就先修，别的先放。**
 
 ### 阶段 2 · 地基修复（确定性赢面，最高优先）
 chinese-geo 押注的"能证明的赢面"：
@@ -26,16 +26,16 @@ chinese-geo 押注的"能证明的赢面"：
 
 退出标准：重跑 audit，`domestic` / `structure` 项转绿。
 
-### 阶段 3 · 结构（委派 `seogeo-structure`）
+### 阶段 3 · 结构（委派 `chinese-geo-structure`）
 答案胶囊（小节开头一两句话先把结论说完）、问答式小标题、表格 / listicle、FAQ + schema 对齐。退出标准：`content` / `structure` 维度回升。
 
-### 阶段 4 · 内容（委派 `seogeo-content`）
+### 阶段 4 · 内容（委派 `chinese-geo-content`）
 结论前置、加统计 / 引文 / 出处、TL;DR、新鲜度。**诚实提醒用户：纯文案手法边际收益随竞争下降，别过度承诺；这步是锦上添花，不是地基。**
 
-### 阶段 5 · 站外 + 实体（委派 `seogeo-offsite`）
+### 阶段 5 · 站外 + 实体（委派 `chinese-geo-offsite`）
 按目标引擎选平台（豆包←抖音 / 头条、元宝←公众号、文心←百度百科 / 百家号、DeepSeek / Kimi←知乎 / CSDN）；一题多发；百科 / sameAs / NAP 立实体。**AI 联网回答大量引用第三方平台而非品牌官网，所以这步常比站内更关键**（具体比例随行业 / 引擎波动，无统一权威数字）。
 
-### 阶段 6 · 监控验证（委派 `seogeo-monitor`）
+### 阶段 6 · 监控验证（委派 `chinese-geo-monitor`）
 `chinese-geo monitor prompts` 生成去品牌化问题 →（零 key 手动粘 / BYOK `monitor run` 自动）→ `monitor score` 算引用率 + SoV。基准 <10% 差 / 10–30% 良 / >30% 优。**按月重测**，回推前几阶段该补哪。
 
 ## 诚实边界（务必传达）

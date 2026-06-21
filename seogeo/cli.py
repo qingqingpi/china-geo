@@ -6,7 +6,7 @@
   chinese-geo schema gen <organization|article|faqpage|breadcrumb>
   chinese-geo llms gen [--title <站点名>] [--summary <一句话简介>]
   chinese-geo init [--site <站点名>] [--sitemap <url>] [--output <目录>]      # 生成站点产物
-  chinese-geo init --agent <claude|codex|gemini|cursor|generic> [--output .] # 接入某 agent
+  chinese-geo init --agent <claude|codex|gemini|cursor|generic|codebuddy|kimi|opencode|qoder|trae|lingma> [--output .] # 接入某 agent
   chinese-geo monitor prompts --industry <行业/品类>
   chinese-geo monitor run --industry <X> --brand <品牌> [--engines deepseek,openai] [--aliases a,b] [--competitors A,B]
   chinese-geo monitor score --answers <file.json> --brand <品牌> [--aliases a,b] [--competitors A,B]
@@ -19,6 +19,7 @@ import os
 import sys
 
 from seogeo.botverify import verify_bot_ip
+from seogeo.demo import render_demo
 from seogeo.engines import available_engines, run_matrix
 from seogeo.generate import (
     build_agent_bundle, build_init_bundle, generate_llms, generate_robots,
@@ -27,21 +28,24 @@ from seogeo.generate import (
 from seogeo.monitor import generate_prompts, score_answers, verdict
 from seogeo.offsite import cross_post_set, recommend
 from seogeo.report import render_json, render_markdown
-from seogeo.service import audit_url
+from seogeo.service import audit_url, fetch_text
+from seogeo.structure_signals import analyze_structure, render_structure
 
 _USAGE = (
     "用法：\n"
-    "  chinese-geo audit <域名或URL> [--format md|json]\n"
+    "  chinese-geo audit <域名或URL> [--format md|json] [--render]   # --render 需 [render] extra（playwright），否则降级启发式\n"
     "  chinese-geo bots gen [--sitemap <url>] [--no-domestic] [--no-overseas]\n"
     "  chinese-geo bots verify <ip> <Baiduspider|Bytespider|PetalBot|Sogou web spider|YisouSpider>\n"
     "  chinese-geo schema gen <organization|article|faqpage|breadcrumb>\n"
     "  chinese-geo llms gen [--title <站点名>] [--summary <一句话简介>]\n"
     "  chinese-geo init [--site <站点名>] [--sitemap <url>] [--output <目录>]\n"
-    "  chinese-geo init --agent <claude|codex|gemini|cursor|generic> [--output .]\n"
+    "  chinese-geo init --agent <claude|codex|gemini|cursor|generic|codebuddy|kimi|opencode|qoder|trae|lingma> [--output .]\n"
     "  chinese-geo monitor prompts --industry <行业/品类>\n"
     "  chinese-geo monitor run --industry <X> --brand <品牌> [--engines deepseek,openai] [--aliases a,b] [--competitors A,B]\n"
     "  chinese-geo monitor score --answers <file.json> --brand <品牌> [--aliases a,b] [--competitors A,B]\n"
-    "  chinese-geo offsite [--engine <豆包|元宝|文心|通义|DeepSeek|Kimi>] [--audience b2b|consumer]"
+    "  chinese-geo offsite [--engine <豆包|元宝|文心|通义|DeepSeek|Kimi>] [--audience b2b|consumer]\n"
+    "  chinese-geo structure <域名或URL> [--format md|json]   # 确定性结构信号（答案胶囊字数/FAQ/表格），非评分，供 structure 判断层\n"
+    "  chinese-geo demo                                  # 内置 fixture 站：体检→修复→复检，前后分数对比（零 key 自证）"
 )
 
 
@@ -58,7 +62,7 @@ def _cmd_audit(args: list) -> int:
         print(_USAGE)
         return 2
     fmt = _arg(args, "--format", "md")
-    result = audit_url(args[0])
+    result = audit_url(args[0], render="--render" in args)  # --render 需 [render] extra，否则降级
     print(render_json(result) if fmt == "json" else render_markdown(result))
     return 1 if any(r["priority"] == "Critical" for r in result.recommendations) else 0
 
@@ -120,8 +124,22 @@ def _init_agent(agent: str, out_dir: str) -> int:
         print(f"✅ 写入：{p}")
     for p in skipped:
         print(f"⏭ 已存在，跳过（如需可手动并入 chinese-geo 段）：{p}")
-    print(f"\n{agent} 接入完成。支持 MCP 的话 .mcp.json 里的 chinese-geo 服务即可用"
-          "（需 pip install \"Chinese-Geo[mcp]\"）。")
+    # 提示按 MCP 策略分流。注意：MCP 配置文件若已存在会被跳过（不覆盖），此时 chinese-geo
+    # 并没有被并进去——不能谎称"已配好"，要提示用户手动并入。
+    _MCP_CFG = (".mcp.json", "opencode.json", "mcp.json")
+    wrote_bn = [os.path.basename(p) for p in wrote]
+    skip_bn = [os.path.basename(p) for p in skipped]
+    if any(b in _MCP_CFG for b in skip_bn) and not any(b in _MCP_CFG for b in wrote_bn):
+        mcp_note = ("MCP 未自动配置：检测到你已有 MCP 配置文件（未覆盖）——"
+                    "请手动把 chinese-geo 服务并入现有配置（见 INSTALL.md 的 MCP 段）")
+    elif any(b.startswith("MCP-SETUP") for b in wrote_bn):
+        mcp_note = "MCP 需手动配置：见写入的 MCP-SETUP-*.md（把其中 JSON 贴进设置面板 / 全局配置）"
+    elif any(b in _MCP_CFG for b in wrote_bn):
+        mcp_note = "MCP 已配好：写入的配置文件里 chinese-geo 服务即可用"
+    else:
+        mcp_note = "MCP：见 INSTALL.md 手动接入"
+    print(f"\n{agent} 接入完成。{mcp_note}"
+          "（需 pip install \"Chinese-Geo[mcp]\" 让 chinese-geo-mcp 在 PATH 上）。")
     return 0
 
 
@@ -173,9 +191,27 @@ def _cmd_monitor(args: list) -> int:
             print("需要 --answers <file.json> 和 --brand <品牌>")
             return 2
         competitors = {name: [] for name in _csv(args, "--competitors")}
-        with open(path, encoding="utf-8") as f:
-            answers = json.load(f)
-        _print_score(score_answers(answers, brand, _csv(args, "--aliases"), competitors), brand)
+        try:
+            with open(path, encoding="utf-8") as f:
+                answers = json.load(f)
+        except FileNotFoundError:
+            print(f"错误：文件不存在——{path}")
+            return 2
+        except PermissionError:
+            print(f"错误：无权读取文件——{path}")
+            return 2
+        except (json.JSONDecodeError, ValueError) as e:
+            print(f"错误：文件不是合法 JSON——{e}")
+            return 2
+        if not isinstance(answers, dict):
+            print("错误：answers 文件顶层必须是 JSON 对象（{{引擎: [回答, ...]}}），不能是数组或其它类型")
+            return 2
+        try:
+            result = score_answers(answers, brand, _csv(args, "--aliases"), competitors)
+        except ValueError as e:
+            print(f"错误：{e}")
+            return 2
+        _print_score(result, brand)
         return 0
     if sub == "run":
         industry = _arg(args, "--industry")
@@ -186,7 +222,8 @@ def _cmd_monitor(args: list) -> int:
         avail = available_engines()
         if not avail:
             print("没有可用引擎：先设置至少一个 API key 环境变量，例如 DEEPSEEK_API_KEY / "
-                  "OPENAI_API_KEY / PERPLEXITY_API_KEY / DASHSCOPE_API_KEY / ARK_API_KEY / MOONSHOT_API_KEY。")
+                  "OPENAI_API_KEY / PERPLEXITY_API_KEY / GEMINI_API_KEY / DASHSCOPE_API_KEY / "
+                  "ARK_API_KEY / MOONSHOT_API_KEY / QIANFAN_API_KEY。")
             return 2
         only = _csv(args, "--engines") or None
         used = [e for e in (only or avail) if e in avail]
@@ -233,12 +270,32 @@ def _cmd_offsite(args: list) -> int:
     return 0
 
 
+def _cmd_structure(args: list) -> int:
+    if not args or args[0].startswith("-"):  # 缺 URL，或把 --flag 误当 URL
+        print(_USAGE)
+        return 2
+    url = args[0]
+    if not url.startswith(("http://", "https://")):
+        url = "https://" + url
+    html, err = fetch_text(url)
+    if html is None:  # 抓不到就别拿空 HTML 当"页面无结构"误报
+        print(f"无法获取页面 HTML（{err or 'HTTP 404'}）。先确认 URL 可访问再重试。")
+        return 2
+    print(render_structure(analyze_structure(html), _arg(args, "--format", "md")))
+    return 0
+
+
+def _cmd_demo(args: list) -> int:
+    print(render_demo())
+    return 0
+
+
 def main(argv: list | None = None) -> int:
     argv = argv if argv is not None else sys.argv[1:]
     cmd = argv[0] if argv else ""
     dispatch = {"audit": _cmd_audit, "bots": _cmd_bots, "schema": _cmd_schema,
                 "llms": _cmd_llms, "init": _cmd_init, "monitor": _cmd_monitor,
-                "offsite": _cmd_offsite}
+                "offsite": _cmd_offsite, "structure": _cmd_structure, "demo": _cmd_demo}
     if cmd in dispatch:
         return dispatch[cmd](argv[1:])
     print(_USAGE)

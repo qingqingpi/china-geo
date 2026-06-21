@@ -54,9 +54,11 @@ def check_domestic_bots(ctx: AuditContext) -> CheckOutcome:
                                        f"Allow: /{bytespider_note}"),
                        evidence=evidence)
     if wildcard_risky:
+        _risky_str = ", ".join(wildcard_risky)
+        _count_hint = "这些爬虫" if len(wildcard_risky) != 2 else "这两家"
         return outcome(RULE_ID, WEIGHT, "warn",
-                       f"{', '.join(wildcard_risky)} 仅靠通配 * 放行——这两家有合并组被无视的站长报告（社区经验、n=1）",
-                       recommendation=("建议为 " + ", ".join(wildcard_risky)
+                       f"{_risky_str} 仅靠通配 * 放行——{_count_hint}有合并组被无视的站长报告（社区经验、n=1）",
+                       recommendation=("建议为 " + _risky_str
                                        + " 各自单独成块并 Allow: /（非官方、属保险做法；其余国内爬虫遵守 * 通配，无需如此）"),
                        evidence=evidence)
     return outcome(RULE_ID, WEIGHT, "pass",

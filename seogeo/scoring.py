@@ -40,4 +40,5 @@ def score_audit(outcomes) -> ScoreResult:
     tot_e = sum(b["earned"] for b in breakdown.values())
     tot_m = sum(b["max"] for b in breakdown.values())
     total = round(100 * tot_e / tot_m) if tot_m else 0
+    total = max(0, min(100, total))
     return ScoreResult(total=total, band=get_band(total), breakdown=breakdown)

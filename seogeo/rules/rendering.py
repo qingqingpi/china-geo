@@ -5,7 +5,8 @@ Playwright 真渲染对比是可选层（后续）。
 """
 from __future__ import annotations
 
-from seogeo.rules.base import AuditContext, CheckOutcome, outcome, register
+from seogeo.dom import scan
+from seogeo.rules.base import AuditContext, CheckOutcome, html_unavailable, outcome, register
 
 RULE_ID = "rendering-js-visibility"
 WEIGHT = 14
@@ -16,6 +17,8 @@ _SSR_MARKERS = ["__next_data__", "data-reactroot"]
 
 @register(id=RULE_ID, category="rendering", weight=WEIGHT)
 def check_js_visibility(ctx: AuditContext) -> CheckOutcome:
+    if ctx.html_error:
+        return html_unavailable(RULE_ID, WEIGHT, "渲染可见性")
     d = ctx.dom
     html_low = (ctx.html or "")[:20000].lower()
     text_len = d.text_length if d else 0
@@ -23,6 +26,22 @@ def check_js_visibility(ctx: AuditContext) -> CheckOutcome:
     has_spa_root = any(m.lower() in html_low for m in _SPA_ROOTS)
     has_ssr_marker = any(m in html_low for m in _SSR_MARKERS)
     evidence = {"text_length": text_len, "headings": heads, "spa_root": has_spa_root}
+
+    # 有 playwright 真渲染对比（rendered_html 被填且非空）→ 用确定证据替代启发式猜测
+    if ctx.rendered_html and text_len < MIN_VISIBLE_CHARS:
+        rendered_len = scan(ctx.rendered_html).text_length
+        evidence["rendered_text_length"] = rendered_len
+        if rendered_len >= MIN_VISIBLE_CHARS:
+            return outcome(RULE_ID, WEIGHT, "fail",
+                           f"确认 JS 渲染空壳：raw HTML 仅 {text_len} 字、渲染后 {rendered_len} 字"
+                           "—— AI 爬虫不执行 JS 就拿不到主要内容",
+                           recommendation="改用 SSR/SSG 或预渲染，让核心内容进初始 HTML",
+                           evidence=evidence)
+        return outcome(RULE_ID, WEIGHT, "warn",
+                       f"raw 与渲染后内容都很少（raw {text_len} / 渲染 {rendered_len} 字）"
+                       "—— 可能真的内容稀薄，确认主要内容是否在线",
+                       recommendation="补充实质内容，或确认抓取未被反爬拦截",
+                       evidence=evidence)
 
     if text_len < MIN_VISIBLE_CHARS and heads == 0 and has_spa_root and not has_ssr_marker:
         return outcome(RULE_ID, WEIGHT, "fail",

@@ -18,3 +18,5 @@ venv/
 
 # 内部设计/策略笔记（不公开）
 DESIGN.md
+LOOP.md
+*.local.md

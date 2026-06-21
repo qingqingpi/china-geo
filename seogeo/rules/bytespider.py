@@ -14,6 +14,12 @@ WEIGHT = 6
 
 @register(id=RULE_ID, category="domestic", weight=WEIGHT)
 def check_bytespider_enforce(ctx: AuditContext) -> CheckOutcome:
+    if ctx.robots_error:  # 抓不到 robots.txt → 无法判定，别误判成"未封禁"而 pass
+        return outcome(RULE_ID, WEIGHT, "warn",
+                       "无法获取 robots.txt，无法判定 Bytespider 是否被封禁 / 是否需服务端硬拦",
+                       recommendation="确认能取到 robots.txt 后重试；注意 Bytespider 不守 robots，必要时服务端 / WAF 按 UA=Bytespider 硬拦",
+                       evidence={"robots_error": ctx.robots_error})
+
     disallowed = bool(ctx.robots_txt) and classify_bot("Bytespider", ctx.robots_txt).status == "blocked"
 
     if not disallowed:
