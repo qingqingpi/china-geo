@@ -19,6 +19,23 @@ def test_audit_url_homepage_fetch_failure_warns_not_fail(monkeypatch):
         assert "无法获取首页 HTML" in by_id[rid].message, rid
 
 
+def test_audit_url_homepage_404_warns_not_fail(monkeypatch):
+    # 首页本身 404：fetch_text 把 404 映射成 (None, None)，html_error 为 None。
+    # 不该让守卫漏判 → 把空首页误当"页面质量差"而 fail，应当作"抓不到首页"warn。
+    def fake_fetch_text(url):
+        if url == "https://example.com":
+            return None, None                      # 首页 404
+        if url.endswith("/robots.txt"):
+            return "User-agent: *\nAllow: /", None
+        return None, None
+    monkeypatch.setattr(svc, "fetch_text", fake_fetch_text)
+
+    by_id = {o.id: o for o in svc.audit_url("https://example.com").outcomes}
+    for rid in ("content-structure", "structure-jsonld"):
+        assert by_id[rid].status == "warn", rid
+        assert "无法获取首页 HTML" in by_id[rid].message, rid
+
+
 def test_audit_url_homepage_ok_judges_normally(monkeypatch):
     # 边界：首页抓得到（含足量内容）时正常判定，不被守卫误伤
     good = (

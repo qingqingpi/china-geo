@@ -36,6 +36,8 @@ def fetch_text(url: str):
 def audit_url(url: str, render: bool = False) -> AuditResult:
     origin = origin_of(url)
     html, html_error = fetch_text(origin)  # 保留首页抓取错误，别让"抓不到"被当成"空页面"假打分
+    if html is None and html_error is None:  # 首页 404：fetch_text 把 404 映射成 (None, None)；
+        html_error = "首页返回 404 或无内容"  # 对首页而言这是"抓不到"，不是"页面真空白"，须让守卫生效
     robots_txt, robots_error = fetch_text(origin + "/robots.txt")
     llms_txt, _ = fetch_text(origin + "/llms.txt")
     sitemap_xml, _ = fetch_text(origin + "/sitemap.xml")
