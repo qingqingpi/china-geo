@@ -49,17 +49,26 @@ def test_brand_alias_counts_as_brand_mention():
 
 
 def test_competitor_alias_counts_in_pool():
-    # 竞品有别名时 count_mentions 对每个名字各自计数（名 + 别名分别命中、不去重）：
-    # "通义千问" 命中 "通义"(1) 与 "通义千问"(1) 共 2 → pool=本1+竞2=3 → SoV=1/3。
+    # 竞品名与别名重叠（"通义" ⊂ "通义千问"）时，文本里 "通义千问" 只算一次物理提及——
+    # 命中区间取并集去重，不把单次出现按"名 + 别名"双计（双计会虚高 SoV）：
+    # 竞品池=1、本品牌=1 → pool=2 → SoV=1/2。
     r = score_answers({"e": ["X 和 通义千问"]}, brand="X", brand_aliases=[],
                       competitors={"通义": ["通义千问"]})
-    assert r["e"]["share_of_voice"] == round(1 / 3, 3)
+    assert r["e"]["share_of_voice"] == 0.5
 
 
 def test_competitor_single_name_counts_once():
     # 竞品仅一个名（无重叠别名）→ pool=本1+竞1 → SoV=0.5
     r = score_answers({"e": ["X 和 竞品B"]}, brand="X", brand_aliases=[],
                       competitors={"竞品B": []})
+    assert r["e"]["share_of_voice"] == 0.5
+
+
+def test_sov_not_inflated_by_overlapping_brand_alias():
+    # 本品牌名与别名重叠（"通义" ⊂ "通义千问"）同样不得虚高 SoV：
+    # 文本里品牌出现 1 次、竞品 1 次 → SoV 应为 0.5，而非别名双计后的 0.667。
+    r = score_answers({"e": ["通义千问 和 竞品B"]}, brand="通义",
+                      brand_aliases=["通义千问"], competitors={"竞品B": []})
     assert r["e"]["share_of_voice"] == 0.5
 
 
@@ -71,6 +80,24 @@ def test_count_mentions_skips_empty_and_none_names():
 
 def test_count_mentions_empty_text():
     assert count_mentions("", ["豆包"]) == 0
+
+
+# ---- count_mentions：重叠名（名 ⊂ 别名）按物理出现去重，真实多次提及不误吞 ----
+
+def test_count_mentions_dedups_overlapping_names():
+    # 别名是名的超串（"通义" ⊂ "通义千问"），"通义千问" 物理上只出现一次：
+    # 命中区间取并集后只算 1 次提及，而非 "通义"(1)+"通义千问"(1)=2。
+    assert count_mentions("X 和 通义千问", ["通义", "通义千问"]) == 1
+
+
+def test_count_mentions_distinct_names_each_count():
+    # 去重只针对重叠区间：两个不相交的名字各出现一次仍计 2，不误伤真实多次提及。
+    assert count_mentions("豆包好，字节也行", ["豆包", "字节"]) == 2
+
+
+def test_count_mentions_repeated_same_name_counts_each():
+    # 同一名字相邻出现两次（区间相接但不重叠）仍计 2——并集只合并真正重叠的区间，不合并相接。
+    assert count_mentions("豆包豆包", ["豆包"]) == 2
 
 
 # ---- _count_occurrences：ASCII 词边界 vs CJK 子串推进 ----

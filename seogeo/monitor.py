@@ -40,37 +40,62 @@ def generate_prompts(topic: str) -> list:
     return out
 
 
-def _count_occurrences(text: str, kw: str) -> int:
-    """大小写无关的关键词计数。
+def _occurrence_spans(text: str, kw: str) -> list:
+    """返回 kw 在 text 中所有命中的 [start, end) 区间（与 _count_occurrences 同语义）。
 
     - ASCII 关键词：加词边界（前后无 A-Za-z0-9），防止前缀/后缀误匹配
       （例：搜索 "DeepSeek" 不命中 "DeepSeeker"，搜索 "AI" 不命中 "AIsolution"）。
-    - 中文/混合关键词：保持子串匹配（CJK 字符无词边界概念；
-      注：过短或易撞词的中文品牌名请提供更具体的别名以减少误匹配）。
+    - 中文/混合关键词：保持子串匹配（CJK 字符无词边界概念），按 len(kw) 非重叠前进。
     """
     if not kw:
-        return 0
+        return []
     if kw.isascii():
         pat = re.compile(
             r'(?<![A-Za-z0-9])' + re.escape(kw) + r'(?![A-Za-z0-9])',
             re.IGNORECASE,
         )
-        return len(pat.findall(text))
-    # 中文/混合：大小写无关子串计数（对齐原有语义）
+        return [(m.start(), m.end()) for m in pat.finditer(text)]
+    # 中文/混合：大小写无关子串，非重叠前进（对齐原有语义）
     lower, k = text.lower(), kw.lower()
-    cnt, i = 0, 0
+    spans, i = [], 0
     while True:
         j = lower.find(k, i)
         if j == -1:
             break
-        cnt += 1
+        spans.append((j, j + len(k)))
         i = j + len(k)
-    return cnt
+    return spans
+
+
+def _count_occurrences(text: str, kw: str) -> int:
+    """大小写无关的关键词计数（ASCII 加词边界 / CJK 子串）。"""
+    return len(_occurrence_spans(text, kw))
 
 
 def count_mentions(text: str, names) -> int:
-    """统计 text 中 names（品牌名 + 别名）的总提及次数。"""
-    return sum(_count_occurrences(text, n) for n in names if n)
+    """统计 text 中 names（品牌名 + 别名）的提及次数，按物理出现去重。
+
+    当多个名字命中同一段文本时（典型：竞品名 "通义" 与其别名 "通义千问"），那一处
+    文本只算一次提及——对所有名字的命中区间取并集，按合并后的不相交区间计数。否则
+    重叠别名会把单次出现重复累加，进而虚高 share-of-voice（本工具核心指标）。
+    只合并真正重叠的区间（start < cur_end），相接但不重叠（如 "豆包豆包" 的两段）
+    仍各算一次，避免误吞真实的多次提及。
+    """
+    spans = []
+    for n in names:
+        if n:
+            spans.extend(_occurrence_spans(text, n))
+    if not spans:
+        return 0
+    spans.sort()
+    count, cur_end = 1, spans[0][1]
+    for start, end in spans[1:]:
+        if start < cur_end:          # 与当前区间重叠 → 同一处提及
+            cur_end = max(cur_end, end)
+        else:                        # 不重叠 → 新的一处提及
+            count += 1
+            cur_end = end
+    return count
 
 
 def score_answers(answers: dict, brand: str, brand_aliases, competitors: dict) -> dict:
